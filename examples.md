@@ -91,21 +91,73 @@ Reviewers: svoboda, s.maddanimath
 
 ### 10\. The value of a pointer to an object whose lifetime has ended is used (6.2.4).
 
-TS17961 5.14 \[nullref\] EXAMPLE 5.15 \[addrescape\] EXAMPLE 1, 2, 3
+``` c
+const char *p;
+void dont_do_this(void) {
+  const char c_str[] = "This will change";
+  p = c_str; // Undefined Behavior if p subsequently read
+}
+
+void innocuous(void) {
+  const char c_str[] = "Surprise, surprise";
+  puts(c_str);
+}
+
+int main(void) {
+  dont_do_this();
+  innocuous();
+  puts(p);  // On some platforms, this will print "Surprise, surprise"
+  return EXIT_SUCCESS;
+}
+```
+
+Cite: TS17961 5.14 \[nullref\] EXAMPLE 5.15 \[addrescape\] EXAMPLE 1, 2, 3
 
 Reviewers: svoboda,s.maddanimath
 
 ### 11\. The value of an object with automatic storage duration is used while the object has an indeterminate representation (6.2.4, 6.7.11, 6.8).
 
-TS17961 5.35 \[uninitref\] EXAMPLE 1, 2  
-CERT C Rule EXP33-C 4th NCCE 4.3.9,  
+``` c
+void get_sign(int number, int *sign) {
+  if (sign == NULL) {
+    /* ... */
+  }
+  if (number > 0) {
+    *sign = 1;
+  } else if (number < 0) {
+    *sign = -1;
+  } // If number == 0, sign is not changed.
+}
+
+int is_negative(int number) {
+  int sign;
+  get_sign(number, &sign);
+  return (sign < 0);  // Undefined Behavior, sign might not be initialized
+}}
+```
+
+Cite: TS17961 5.35 \[uninitref\] EXAMPLE 1, 2
+CERT C Rule EXP33-C 4th NCCE 4.3.9,
 CERT C Rec MSC22-C 3rd NCCE
 
 Reviewers: svoboda, s.maddanimath
 
 ### 12\. A non-value representation is read by an lvalue expression that does not have character type (6.2.6.1).
 
-TS17961 5.35 \[uninitref\] EXAMPLE 3, 4
+``` c
+void f(size_t n) {
+  int *a = (int *)malloc(n * sizeof(int));
+  if (a != NULL) {
+    for (size_t i = 0; i != n; ++i) {
+      a[i] = a[i] ^ a[i]; // Undefined Behavior
+    }
+    /* ... */
+    free(a);
+  }
+}
+```
+
+Cite: TS17961 5.35 \[uninitref\] EXAMPLE 3, 4
 
 Reviewers: svoboda,s.maddanimath
 
@@ -126,7 +178,20 @@ Reviewers: svoboda
 
 ### 14\. Two declarations of the same object or function specify types that are not compatible (6.2.7).
 
-TS17961 5.13 \[funcdecl\] EXAMPLE 1, 2, 4
+``` c
+/* in a.c */
+extern int i;  // Undefined Behavior
+
+int f(void) {
+  return ++i;
+}
+
+
+/* in b.c */
+short i;  // Undefined Behavior
+```
+
+Cite: TS17961 5.13 \[funcdecl\] EXAMPLE 1, 2, 4
 
 Reviewers: svoboda
 
@@ -215,19 +280,46 @@ Reviewers: svoboda
 
 ### 23\. Conversion of a pointer to an integer type produces a value outside the range that can be represented (6.3.2.3).
 
-TS17961 5.10 \[intptrconv\] EXAMPLE 1,2
+``` c
+void f(void) {
+  char *ptr;
+  /* ... */
+  unsigned int number = (unsigned int)ptr;  // Undefined Behavior
+  /* ... */
+}
+```
+
+Cite: TS17961 5.10 \[intptrconv\] EXAMPLE 1,2
 
 Reviewers: svoboda
 
 ### 24\. Conversion between two pointer types produces a result that is incorrectly aligned (6.3.2.3).
 
-TS17961 5.11 \[alignconv\] EXAMPLE 1
+``` c
+void f(void) {
+  int *i_ptr;
+  char c;
+  i_ptr = (int *)&c;  // Undefined Behavior
+  /* ... */
+}
+```
+
+Cite: TS17961 5.11 \[alignconv\] EXAMPLE 1
 
 Reviewers: svoboda
 
 ### 25\. A pointer is used to call a function whose type is not compatible with the referenced type (6.3.2.3).
 
-TS17961 5.6 \[argcomp\] EXAMPLE 1
+``` c
+char *(*fp)();
+void f(void) {
+  char *c;
+  fp = strchr;
+  c = fp(12, 2);  // Undefined Behavior, incorrect arguments
+}
+```
+
+Cite: TS17961 5.6 \[argcomp\] EXAMPLE 1
 
 Reviewers: svoboda, s.maddanimath
 
@@ -274,7 +366,27 @@ Reviewers: svoboda
 
 ### 30\. Two identifiers differ only in nonsignificant characters (6.4.2.1).
 
-TS17961 5.13 \[funcdecl\] EXAMPLE 4
+``` c
+/* in bash/bashline.h */
+extern char* bash_groupname_completion_function(const char *, int);
+// Undefined Behavior, the identifier exceeds 31 characters
+
+
+/* in a.c */
+#include <bashline.h>
+void w(const char *s, int i) {
+  bash_groupname_completion_function(s, i);
+}
+
+
+/* in b.c */
+int bash_groupname_completion_funct; 
+// Undefined Behavior, identifier not unique within 31 characters
+```
+
+Note: The identifier bash_groupname_completion_function referenced here was taken from [GNU Bash](https://www.gnu.org/software/bash/) version 3.2.
+
+Cite: TS17961 5.13 \[funcdecl\] EXAMPLE 4
 
 Reviewers: svoboda
 
@@ -288,7 +400,15 @@ Reviewers: svoboda, j.myers
 
 ### 32\. The program attempts to modify a string literal (6.4.5).
 
-TS17961 5.28 \[strmod\] EXAMPLE 1, 2, 3, 4, 5
+``` c
+void f1(void) {
+  char *p = "string literal";
+  p[0] = 'S';  // Undefined Behavior
+  /* ... */
+}
+```
+
+Cite: TS17961 5.28 \[strmod\] EXAMPLE 1, 2, 3, 4, 5
 
 Reviewers: svoboda
 
@@ -309,31 +429,98 @@ Reviewers: svoboda, s.maddanimath
 
 ### 35\. An exceptional condition occurs during the evaluation of an expression (6.5.).
 
-TS17961 5.30 \[intoflow\] EXAMPLE 1
+``` c
+int add(void) {
+  int x;
+  /* Initialize x with an untrusted value, which could be INT_MAX */
+  return x + 1;    // Undefined Behavior
+}
+```
+
+Cite: TS17961 5.30 \[intoflow\] EXAMPLE 1
 
 Reviewers: svoboda
 
 ### 36\. An object has its stored value accessed other than by an lvalue of an allowable type (6.5.1).
 
-TS17961 5.1 \[ptrcomp\] EXAMPLE
+``` c
+void f(void) {
+  if (sizeof(int) == sizeof(float)) {
+    float f = 0.0f;
+    int *ip = (int *)&f;
+    printf("float is %f\n", f);
+    (*ip)++; // Undefined Behavior
+    printf("float is %f\n", f);
+  }
+}
+```
+
+Cite: TS17961 5.1 \[ptrcomp\] EXAMPLE
 
 Reviewers: svoboda
 
 ### C18-37. For a call to a function without a function prototype in scope, the number of arguments does not equal the number of parameters (6.5.2.2).
 
-TS17961 5.6 \[argcomp\] EXAMPLE 2
+``` c
+/* in another source file */
+void copy(char *dst, const char *src) {
+  if (!strcpy(dst, src)) {
+    /* Report Error */
+  }
+}
+
+
+/* in this source file -- no copy prototype in scope */
+void copy();
+
+void g(const char *s) {
+  char buf[20];
+  copy(buf, s, sizeof buf);  // Undefined Behavior
+  /* ... */
+}
+```
+
+Cite: TS17961 5.6 \[argcomp\] EXAMPLE 2
 
 Reviewers: svoboda, s.maddanimath
 
 ### C18-38. For a call to a function without a function prototype in scope where the function is defined with a function prototype, either the prototype ends with an ellipsis or the types of the arguments after default argument promotion are not compatible with the types of the parameters (6.5.2.2).
 
-TS17961 5.6 \[argcomp\] EXAMPLE 3
+``` c
+/* in another source file */
+void buginf(const char *fmt, ...) {
+  /* ... */
+}
+
+
+/* in this source file -- no buginf prototype in scope */
+void buginf();
+
+void h(void) {
+  buginf("bug in function %s, line %d\n", __func__, __LINE__);  // Undefined Behavior
+  /* ... */
+}
+```
+
+Cite: TS17961 5.6 \[argcomp\] EXAMPLE 3
 
 Reviewers: svoboda, s.maddanimath
 
 ### 37\. A function is defined with a type that is not compatible with the type (of the expression) pointed to by the expression that denotes the called function (6.5.3.3).
 
-TS17961 5.6 \[argcomp\] EXAMPLE 4, 5.13 \[funcdecl\] EXAMPLE 3
+``` c
+/* in somefile.c */
+long f(long x) {
+  return x < 0 ? -x : x;
+}
+
+/* in otherfile.c */
+int g(int x) {
+  return f(x);  // Undefined Behavior
+}
+```
+
+Cite: TS17961 5.6 \[argcomp\] EXAMPLE 4, 5.13 \[funcdecl\] EXAMPLE 3
 
 Reviewers: svoboda, s.maddanimath
 
@@ -370,37 +557,113 @@ Note: Removed from J.2. by [N3244](https://www.open-std.org/jtc1/sc22/wg14/www/d
 
 ### 41\. The value of the second operand of the / or % operator is zero (6.5.6).
 
-TS17961 5.26 \[diverr\] EXAMPLE 1
+``` c
+int divide(int x) {
+  int y;
+  /* Initialize y with an untrusted value, which could be 0 */
+  return x / y;  // Undefined Behavior
+}
+```
+
+Cite: TS17961 5.26 \[diverr\] EXAMPLE 1
 
 Reviewers: svoboda, s.maddanimath
 
 ### 42\. If the quotient a/b is not representable, the behavior of both a/b and a%b (6.5.6).
 
-TS17961 5.26 \[diverr\] EXAMPLE 2
+``` c
+int remainder(int x) {
+  int y;
+  /* Initialize y with an untrusted value, which could be 0 */
+  return x % y;  // Undefined Behavior
+}
+```
+
+Cite: TS17961 5.26 \[diverr\] EXAMPLE 2
 
 Reviewers: svoboda, s.maddanimath
 
 ### 43\. Addition or subtraction of a pointer into, or just beyond, an array object and an integer type produces a result that does not point into, or just beyond, the same array object (6.5.7).
 
-TS17961 5.22 \[invptr\] EXAMPLE 1
+``` c
+#define TABLESIZE 100
+static int table[TABLESIZE];
+
+int *f(int index) {
+  if (index < TABLESIZE) {
+    return table + index;   // Undefined Behavior
+  }
+  return NULL;
+}
+```
+
+Cite: TS17961 5.22 \[invptr\] EXAMPLE 1
 
 Reviewers: svoboda
 
 ### 44\. Addition or subtraction of a pointer into, or just beyond, an array object and an integer type produces a result that points just beyond the array object and is used as the operand of a unary \* operator that is evaluated (6.5.7).
 
-TS17961 5.22 \[invptr\] EXAMPLE 4, 6, 10, 12
+``` c
+#define MAX_MACHINE_NAME_LENGTH 64
+char *get_machine_name(const char *path) {
+  char *machine_name = (char *)malloc(MAX_MACHINE_NAME_LENGTH + 1);
+  if (machine_name == NULL) {
+    return NULL;
+  }
+
+  while (*path != '\\') {
+    *machine_name++ = *path++;  // Undefined Behavior, if \ not in path
+  }
+
+  *machine_name = '\0';
+  return machine_name;
+}
+```
+
+Cite: TS17961 5.22 \[invptr\] EXAMPLE 4, 6, 10, 12
 
 Reviewers: svoboda
 
 ### 45\. Pointers that do not point into, or just beyond, the same array object are subtracted (6.5.7).
 
-TS17961 5.36 \[ptrobj\] EXAMPLE, CERT C Rule ARR36-C 1st NCCE 7.3.1
+``` c
+#define SIZE 256
+
+void f(void) {
+  int nums[SIZE];
+  char *c_str[SIZE];
+  int *next_num_ptr = nums;
+  int free_bytes;
+
+  /* ... increment next_num_ptr as array fills */
+
+  free_bytes = c_str - (char **)next_num_ptr;   // Undefined Behavior
+  /* next_num_ptr part of name array, even if it equals c_str! */
+  
+  /* ... */
+}
+```
+
+Cite: TS17961 5.36 \[ptrobj\] EXAMPLE, CERT C Rule ARR36-C 1st NCCE 7.3.1
 
 Reviewers: svoboda
 
 ### 46\. An array subscript is out of range, even if an object is apparently accessible with the given subscript (as in the lvalue expression a\[1\]\[7\] given the declaration int a\[4\]\[5\]) (6.5.7).
 
-TS17961 5.22 \[invptr\] EXAMPLE 8
+``` c
+enum { COLS = 5, ROWS = 7 };
+static int matrix[ROWS][COLS];
+
+void init_matrix(int x) {
+  for (size_t i = 0; i != COLS; ++i) {
+    for (size_t j = 0; j != ROWS; ++j) {
+      matrix[i][j] = x;  // Undefined Behavior, i and j swapped
+    }
+  }
+}
+```
+
+Cite: TS17961 5.22 \[invptr\] EXAMPLE 8
 
 Reviewers: svoboda
 
@@ -591,7 +854,17 @@ Reviewers: svoboda
 
 ### 65\. An object which has been modified is accessed through a restrict-qualified pointer to a const-qualified type, or through a restrict-qualified pointer and another pointer that are not both based on the same object (6.7.4.2).
 
-TS17961 5.33 \[restrict\] EXAMPLE 1, 2, CERT C Rule EXP43-C 2st NCCE 4.11.2.1, 3rd NCCE 4.11.2.3, 5th NCCE 4.11.4.1
+``` c
+void abcabc(void) {
+  char c_str[]= "abc123edf";
+  char *ptr1 = c_str;
+  char *ptr2 = c_str + strlen("abc");
+  memcpy(ptr2, ptr1, 6);   // Undefined Behavior, objects of ptr1 & ptr2 overlap
+  puts(c_str);
+}
+```
+
+Cite: TS17961 5.33 \[restrict\] EXAMPLE 1, 2, CERT C Rule EXP43-C 2st NCCE 4.11.2.1, 3rd NCCE 4.11.2.3, 5th NCCE 4.11.4.1
 
 Reviewers: svoboda
 
@@ -1009,7 +1282,17 @@ Reviewers: svoboda, s.maddanimath
 
 ### 105\. The program declares or defines a reserved identifier, other than as allowed by 7.1.4 (7.1.3).
 
-TS17961 5.44 \[resident\] EXAMPLE 1, 2, 4, 6, 8
+``` c
+static const unsigned int _max_limit = 1024; // Undefined Behavior
+unsigned int _limit = 100; // Undefined Behavior
+// Identifiers that begin with _ are reserved.
+
+unsigned int getValue(unsigned int count) {
+  return count < _limit ? count : _limit;
+}
+```
+
+Cite: TS17961 5.44 \[resident\] EXAMPLE 1, 2, 4, 6, 8
 
 Reviewers: svoboda
 
@@ -1034,7 +1317,18 @@ Reviewers: svoboda, j.myers
 
 ### 108\. The pointer passed to a library function array parameter does not have a value such that all address computations and object accesses are valid (7.1.4).
 
-TS17961 5.20 \[libptr\] EXAMPLE 1, 2, 3, 4, 5.22 \[invptr\] EXAMPLE 13, 5.31 \[nonnullcs\] EXAMPLE 2, 5.37 \[taintstrcpy\] EXAMPLE, 5.40 \[taintformatio\] EXAMPLE 2
+``` c
+void f1(size_t nchars) {
+  char *p = (char *)malloc(nchars);
+  const size_t n = nchars + 1;
+  if (p) {
+    memset(p, 0, n); // Undefined Behavior, 1-byte buffer overflow
+    /* ... */
+  }
+}
+```
+
+Cite: TS17961 5.20 \[libptr\] EXAMPLE 1, 2, 3, 4, 5.22 \[invptr\] EXAMPLE 13, 5.31 \[nonnullcs\] EXAMPLE 2, 5.37 \[taintstrcpy\] EXAMPLE, 5.40 \[taintformatio\] EXAMPLE 2
 
 Reviewers: svoboda
 
@@ -1072,13 +1366,29 @@ Reviewers: svoboda
 
 ### 112\. The value of an argument to a character handling function is neither equal to the value of EOF nor representable as an unsigned char (7.4).
 
-TS17961 5.32 \[chrsgnext\] EXAMPLE
+``` c
+size_t count_preceding_whitespace(const char *s) {
+  const char *t = s;
+  size_t length = strlen(s) + 1;
+
+  while (isspace(*t) && (t - s < length)) {  // Undefined Behavior, if char is signed
+    ++t;
+  }
+  return t - s;
+}
+```
+
+Cite: TS17961 5.32 \[chrsgnext\] EXAMPLE
 
 Reviewers: svoboda
 
 ### 113\. A macro definition of errno is suppressed to access an actual object, or the program defines an identifier with the name errno (7.5).
 
-TS17961 5.44 \[resident\] EXAMPLE 1, CERT C Rule MSC38-C 2nd NCCE 15.5.3
+``` c
+extern int errno;  // Undefined Behavior
+```
+
+Cite: TS17961 5.44 \[resident\] EXAMPLE 1, CERT C Rule MSC38-C 2nd NCCE 15.5.3
 
 Reviewers: svoboda
 
@@ -1141,7 +1451,26 @@ Reviewers: svoboda
 
 ### 119\. The program modifies the string pointed to by the value returned by the setlocale function (7.11.1.1).
 
-TS17961 5.29 \[libmod\] EXAMPLE 1
+``` c
+void f1(void) {
+  char *locale = setlocale(LC_ALL, 0);
+  if (locale != NULL) {
+    char *cats[8];
+    char *sep = locale;
+    cats[0] = locale;
+    int i;
+
+    if (sep) {
+      for (i = 0; (sep = strstr(sep, ";:")) && i < 8; ++i) {
+        *sep = '\0';   // Undefined Behavior
+        cats[i] = ++sep;
+      }
+    }
+  }
+}
+```
+
+Cite: TS17961 5.29 \[libmod\] EXAMPLE 1
 
 Reviewers: svoboda
 
@@ -1161,7 +1490,19 @@ Reviewers: svoboda, j.myers
 
 ### 121\. The program modifies the structure pointed to by the value returned by the localeconv function (7.11.2.1).
 
-TS17961 5.29 \[libmod\] EXAMPLE 2
+``` c
+void f2(void) {
+  struct lconv *conv = localeconv();
+  if ('\0' == conv->decimal_point[0]) {
+    conv->decimal_point = ".";   // Undefined Behavior
+  }
+  if ('\0' == conv->thousands_sep[0]) {
+    conv->thousands_sep = ",";   // Undefined Behavior
+  }
+}
+```
+
+Cite: TS17961 5.29 \[libmod\] EXAMPLE 2
 
 Reviewers: svoboda
 
@@ -1238,13 +1579,72 @@ Reviewers: svoboda
 
 ### 131\. A signal occurs as the result of calling the abort or raise function, and the signal handler calls the raise function (7.14.1.1).
 
-TS17961 5.5 \[asyncsig\] EXAMPLE 2, CERT C Rule SIG30-C 3rd NCCE 12.1.5
+``` c
+void term_handler(int signum) {
+  /* SIGTERM handling specific */
+}
+
+void int_handler(int signum) {
+  /* SIGINT handling specific */
+  if (raise(SIGTERM) != 0) {   // Undefined Behavior
+    /* Handle error */
+  }
+}
+
+int main(void) {
+  if (signal(SIGTERM, term_handler) == SIG_ERR) {
+    /* Handle error */
+  }
+  if (signal(SIGINT, int_handler) == SIG_ERR) {
+    /* Handle error */
+  }
+
+  /* Program code */
+
+  if (raise(SIGINT) != 0) {
+    /* Handle error */
+  }
+
+  /* More code */
+
+  return EXIT_SUCCESS;
+}
+```
+
+Cite: TS17961 5.5 \[asyncsig\] EXAMPLE 2, CERT C Rule SIG30-C 3rd NCCE 12.1.5
 
 Reviewers: svoboda
 
 ### 132\. A signal occurs other than as the result of calling the abort or raise function, and the signal handler refers to an object with static or thread storage duration that is not a lock-free atomic object other than by assigning a value to an object declared as volatile sig\_atomic\_t, or calls any function in the standard library other than the abort function, the \_Exit function, the quick\_exit function, the functions in \<stdatomic.h> (except where explicitly stated otherwise) when the atomic arguments are lock-free, the atomic\_is\_lock\_free function with any atomic argument, or the signal function (for the same signal number) (7.14.1.1).
 
-TS17961 5.3 \[accsig\] EXAMPLE, 5.5 \[asyncsig\] EXAMPLE 1, 3
+``` c
+#define MAX_MSG_SIZE 24
+char *err_msg;
+
+void handler(int signum) {
+  if ((strcpy(err_msg, "SIGINT detected.")) == err_msg){ // Undefined Behavior
+    /* ... */
+  }
+}
+
+int main(void) {
+  signal(SIGINT, handler);
+
+  err_msg = (char *)malloc(MAX_MSG_SIZE);
+  if (err_msg == NULL) {
+    /* Handle error condition */
+  }
+  if ((strcpy(err_msg, "No errors yet.")) == err_msg) {
+    /* ... */
+  }
+
+  /* Main code loop */
+
+  return EXIT_SUCCESS;
+}
+```
+
+Cite: TS17961 5.3 \[accsig\] EXAMPLE, 5.5 \[asyncsig\] EXAMPLE 1, 3
 
 Reviewers: svoboda
 
@@ -1560,7 +1960,27 @@ Reviewers: svoboda, j.myers
 
 ### 156\. An output operation on an update stream is followed by an input operation without an intervening call to the fflush function or a file positioning function, or an input operation on an update stream is followed by an output operation with an intervening call to a file positioning function (7.23.5.3).
 
-TS17961 5.27 \[ioileave\] EXAMPLE
+``` c
+void f(const char *filename, char append_data[BUFSIZ]) {
+  char data[BUFSIZ];
+  FILE *file;
+
+  file = fopen(filename, "a+");
+  if (file == NULL) {
+    /* ... */
+  }
+  if (fwrite(append_data, sizeof(char), BUFSIZ, file) != BUFSIZ) {
+    /* ... */
+  }
+  if (fread(data, sizeof(char), BUFSIZ, file) != 0) {  // Undefined Behavior
+    /* ... */
+  }
+  
+  fclose(file);
+}
+```
+
+Cite: TS17961 5.27 \[ioileave\] EXAMPLE
 
 Reviewers: svoboda
 
@@ -1584,7 +2004,16 @@ Reviewers: svoboda, j.myers
 
 ### 158\. There are insufficient arguments for the format in a call to one of the formatted input/output functions, or an argument does not have an appropriate type (7.23.6.1, 7.23.6.2, 7.31.2.1, 7.31.2.2).
 
-TS17961 5.45 \[invfmtstr\] EXAMPLE, CERT C Rec DCL10-C 2nd NCCE
+``` c
+void f(void) {
+  const char *error_msg = "Resource not available to user.";
+  int error_type = 3;
+  /* ... */
+  printf("Error (type %s): %d\n", error_type, error_msg);  // Undefined Behavior
+}
+```
+
+Cite: TS17961 5.45 \[invfmtstr\] EXAMPLE, CERT C Rec DCL10-C 2nd NCCE
 
 Reviewers: svoboda
 
@@ -1651,7 +2080,12 @@ Reviewers: svoboda, j.myers
 
 ### 164\. An s conversion specifier is encountered by one of the formatted output functions, and the argument is missing the null terminator (unless a precision is specified that does not require null termination) (7.23.6.1, 7.31.2.1).
 
-TS17961 5.31 \[nonnullcs\] EXAMPLE 1
+``` c
+char str[3] = "abc";  // str not null-terminated!
+printf("%s\n", str);  // Undefined Behavior
+```
+
+Cite: TS17961 5.31 \[nonnullcs\] EXAMPLE 1
 
 Reviewers: svoboda
 
@@ -1739,7 +2173,12 @@ Reviewers: svoboda
 
 ### 171\. A c, s, or \[ conversion specifier is encountered by one of the formatted input functions, and the array pointed to by the corresponding argument is not large enough to accept the input sequence (and a null terminator if the conversion specifier is s or \[) (7.23.6.2, 7.31.2.2).
 
-TS17961 5.40 \[taintformatio\] EXAMPLE 1
+``` c
+char buf[BUF_LENGTH];
+fscanf(stdin, "%s", buf);  // Undefined Behavior
+```
+
+Cite: TS17961 5.40 \[taintformatio\] EXAMPLE 1
 
 Reviewers: svoboda
 
@@ -1884,7 +2323,28 @@ Reviewers: svoboda
 
 ### 181\. The fsetpos function is called to set a position that was not returned by a previous successful call to the fgetpos function on a stream associated with the same file (7.23.9.3).
 
-TS17961 5.41 \[xfilepos\] EXAMPLE
+``` c
+FILE *opener(const char *filename) {
+  fpos_t offset;
+  if (filename == NULL) {
+    /* ... */
+  }
+
+  FILE *file = fopen(filename, "r");
+  if (file == NULL) {
+    /* ... */
+  }
+
+  memset(&offset, 0, sizeof(offset));
+  if (fsetpos(file, &offset) != 0) {  // Undefined Behavior
+    /* ... */
+  }
+
+  return file;
+}
+```
+
+Cite: TS17961 5.41 \[xfilepos\] EXAMPLE
 
 Reviewers: svoboda
 
@@ -1904,13 +2364,42 @@ Reviewers: svoboda, j.myers
 
 ### 183\. The value of a pointer that refers to space deallocated by a call to the free or realloc function is used (7.24.3).
 
-TS17961 5.2 \[accfree\] EXAMPLE 1,2,3
+``` c
+struct List { struct List *next; /* ... */ };
+
+void free_list(struct List *head) {
+  for (; head != NULL; head = head->next) {  // Undefined Behavior
+    free(head);
+  }
+}
+```
+
+Cite: TS17961 5.2 \[accfree\] EXAMPLE 1,2,3
 
 Reviewers: svoboda
 
 ### 184\. The pointer argument to the free or realloc function is unequal to a null pointer and does not match a pointer earlier returned by a memory management function, or the space has been deallocated by a call to free or realloc (7.24.3.3, 7.24.3.7).
 
-TS17961 5.23 \[dblfree\] EXAMPLE 1, 2, TS17961 5.34 \[xfree\] EXAMPLE 1, 2
+``` c
+void f(size_t num_elem) {
+  int error_condition = 0;
+  int *x = (int *)malloc(num_elem * sizeof(int));
+  if (x == NULL) {
+    /* ... */
+  }
+  /* ... */
+  if (error_condition == 1) {
+    /* ... */
+    free(x);
+  }
+  /* ... */
+  free(x);   // Undefined Behavior
+  x = NULL;
+}
+```
+
+Cite: TS17961 5.23 \[dblfree\] EXAMPLE 1, 2,
+Cite: TS17961 5.34 \[xfree\] EXAMPLE 1, 2
 
 Reviewers: svoboda
 
@@ -1948,7 +2437,21 @@ Reviewers: svoboda
 
 ### 189\. The string set up by the getenv or strerror function is modified by the program (7.24.4.6, 7.26.6.3).
 
-TS17961 5.29 \[libmod\] EXAMPLE 3, 4
+``` c
+void f3(void) {
+  char *shell_dir = getenv("SHELL");
+
+  if (shell_dir != NULL) {
+    char *slash = strrchr(shell_dir, '/');
+    if (slash) {
+      *slash = '\0';  // Undefined Behavior
+    }
+    /* use shell_dir */
+  }
+}
+```
+
+Cite: TS17961 5.29 \[libmod\] EXAMPLE 3, 4
 
 Reviewers: svoboda
 
