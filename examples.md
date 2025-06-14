@@ -29,9 +29,9 @@ Reviewers: svoboda
 
 void func(void) {
   int \u0401;
-  /* ... */
+  // ...
   assign(\u04, 01, 4);   // Undefined Behavior
-  /* ... */
+  // ...
 }
 ```
 
@@ -43,6 +43,7 @@ Reviewers: svoboda
 
 ``` c
 #include <stdio.h>
+
 int main(float argc) {  // Undefined Behavior
   printf("main argument count:%f\n", argc); 
   return 0;
@@ -70,7 +71,7 @@ void toggle_flag(void) {
 }
 
 bool get_flag(void) {
-  return atomic_load(&flag);   // Undefined Behavior, race condition
+  return atomic_load(&flag);       // Undefined Behavior, race condition
 }
 ```
 
@@ -83,7 +84,7 @@ Reviewers: svoboda
 EXTENDED COMPILABLE EXAMPLE: Consider the following non-standard extension: a compiler that accepts the non-ASCII character: `÷` to act as a division operator.  Consequently, in this compiler, the following code would be well-defined, but it is undefined behavior for compilers without this extension (and also a syntax error):
 
 ``` c
-/* In UTF-8: the division sign == '÷' == U+00F7 */
+// In UTF-8: the division sign == '÷' == U+00F7
 double x = 3 ÷ 7; // Undefined Behavior
 ```
 
@@ -116,10 +117,6 @@ int i4;              // Valid tentative definition
 int i5;              // Undefined Behavior, linkage disagreement with previous
 ```
 
-Cite: CERT C Rule DCL36-C 1st NCCE 3.3.1
-
-Reviewers: svoboda
-
 Note: the following is a different example which is more complex:
 
 ``` c
@@ -127,26 +124,28 @@ static int a;
 int f(void) {
   int a;
   {
-     extern int a; // not internal!
+     extern int a; // Undefined Behavior, not internal!
   }
 }
 ```
 
-Reviewers: uecker, j.myers
+Cite: CERT C Rule DCL36-C 1st NCCE 3.3.1
+
+Reviewers: svoboda, uecker, j.myers
 
 ### 9\. An object is referred to outside of its lifetime (6.2.4).
 
 ``` c
 void squirrel_away(char **ptr_param) {
   char local[10];
-  /* Initialize array */
+  // Initialize array ...
   *ptr_param = local;
 }
 
 void rodent(void) {
   char *ptr;
   squirrel_away(&ptr);
-  /* Undefined Behavior if ptr is ever read here */
+  // Undefined Behavior if ptr is ever read here
 }
 ```
 
@@ -186,7 +185,7 @@ Reviewers: svoboda
 ``` c
 void get_sign(int number, int *sign) {
   if (sign == NULL) {
-    /* ... */
+    // ...
   }
   if (number > 0) {
     *sign = 1;
@@ -217,7 +216,7 @@ void f(size_t n) {
     for (size_t i = 0; i != n; ++i) {
       a[i] = a[i] ^ a[i]; // Undefined Behavior
     }
-    /* ... */
+    // ...
     free(a);
   }
 }
@@ -245,7 +244,7 @@ Reviewers: svoboda
 ### 14\. Two declarations of the same object or function specify types that are not compatible (6.2.7).
 
 ``` c
-/* in a.c */
+// In a.c:
 extern int i;  // Undefined Behavior
 
 int f(void) {
@@ -253,8 +252,8 @@ int f(void) {
 }
 
 
-/* in b.c */
-short i;  // Undefined Behavior
+// In b.c:
+short i;       // Undefined Behavior
 ```
 
 Cite: TS17961 5.13 \[funcdecl\] EXAMPLE 1, 2, 4
@@ -355,7 +354,7 @@ void f(int x) {
 
 void* p = (void*) f;
 int (*g)(int) = p;
-int y = g(123); // Undefined Behavior
+int y = g(123);   // Undefined Behavior
 printf("y is %d\n", y);
 ```
 
@@ -366,9 +365,9 @@ Reviewers: svoboda
 ``` c
 void f(void) {
   char *ptr;
-  /* ... */
+  // ...
   unsigned int number = (unsigned int)ptr;  // Undefined Behavior
-  /* ... */
+  // ...
 }
 ```
 
@@ -383,7 +382,7 @@ void f(void) {
   int *i_ptr;
   char c;
   i_ptr = (int *)&c;  // Undefined Behavior
-  /* ... */
+  // ...
 }
 ```
 
@@ -450,24 +449,25 @@ Reviewers: svoboda
 ### 30\. Two identifiers differ only in nonsignificant characters (6.4.2.1).
 
 ``` c
-/* in bash/bashline.h */
+// In bash/bashline.h:
 extern char* bash_groupname_completion_function(const char *, int);
 // Undefined Behavior, the identifier exceeds 31 characters
 
 
-/* in a.c */
+// In a.c:
 #include <bashline.h>
+
 void w(const char *s, int i) {
   bash_groupname_completion_function(s, i);
+  // This function was taken from GNU Bash, version 3.2.
+  // https://www.gnu.org/software/bash/
 }
 
 
-/* in b.c */
+// In b.c:
 int bash_groupname_completion_funct; 
 // Undefined Behavior, identifier not unique within 31 characters
 ```
-
-Note: The identifier bash_groupname_completion_function referenced here was taken from [GNU Bash](https://www.gnu.org/software/bash/) version 3.2.
 
 Cite: TS17961 5.13 \[funcdecl\] EXAMPLE 4
 
@@ -487,7 +487,7 @@ Reviewers: svoboda, j.myers
 void f1(void) {
   char *p = "string literal";
   p[0] = 'S';  // Undefined Behavior
-  /* ... */
+  // ...
 }
 ```
 
@@ -512,7 +512,7 @@ Reviewers: svoboda, j.myers
 void func(void) {
   int i = 2;
   int a = 81 / CUBE(++i);  // Undefined Behavior
-  /* ... */
+  // ...
 }
 ```
 
@@ -525,7 +525,7 @@ Reviewers: svoboda
 ``` c
 int add(void) {
   int x;
-  /* Initialize x with an untrusted value, which could be INT_MAX */
+  // Initialize x with an untrusted value, which could be INT_MAX
   return x + 1;    // Undefined Behavior
 }
 ```
@@ -555,43 +555,45 @@ Reviewers: svoboda
 ### C18-37. For a call to a function without a function prototype in scope, the number of arguments does not equal the number of parameters (6.5.2.2).
 
 ``` c
-/* in another source file */
+// In another source file:
 void copy(char *dst, const char *src) {
   if (!strcpy(dst, src)) {
-    /* Report Error */
+    // Handle Error
   }
 }
 
 
-/* in this source file -- no copy prototype in scope */
+// In this source file -- no copy prototype in scope:
 void copy();
 
 void g(const char *s) {
   char buf[20];
   copy(buf, s, sizeof buf);  // Undefined Behavior
-  /* ... */
+  // ...
 }
 ```
 
 Cite: TS17961 5.6 \[argcomp\] EXAMPLE 2
+
+Note: Removed from C23
 
 Reviewers: svoboda
 
 ### C18-38. For a call to a function without a function prototype in scope where the function is defined with a function prototype, either the prototype ends with an ellipsis or the types of the arguments after default argument promotion are not compatible with the types of the parameters (6.5.2.2).
 
 ``` c
-/* in another source file */
+// In another source file:
 void buginf(const char *fmt, ...) {
-  /* ... */
+  // ...
 }
 
 
-/* in this source file -- no buginf prototype in scope */
+// In this source file -- no buginf prototype in scope:
 void buginf();
 
 void h(void) {
   buginf("bug in function %s, line %d\n", __func__, __LINE__);  // Undefined Behavior
-  /* ... */
+  // ...
 }
 ```
 
@@ -599,15 +601,17 @@ Cite: TS17961 5.6 \[argcomp\] EXAMPLE 3
 
 Reviewers: svoboda
 
+Note: Removed from C23
+
 ### 37\. A function is defined with a type that is not compatible with the type (of the expression) pointed to by the expression that denotes the called function (6.5.3.3).
 
 ``` c
-/* in somefile.c */
+// In somefile.c:
 long f(long x) {
   return x < 0 ? -x : x;
 }
 
-/* in otherfile.c */
+// In otherfile.c:
 int g(int x) {
   return f(x);  // Undefined Behavior
 }
@@ -653,7 +657,7 @@ Note: Removed from J.2. by [N3244](https://www.open-std.org/jtc1/sc22/wg14/www/d
 ``` c
 int divide(int x) {
   int y;
-  /* Initialize y with an untrusted value, which could be 0 */
+  // Initialize y with an untrusted value, which could be 0
   return x / y;  // Undefined Behavior
 }
 ```
@@ -667,7 +671,7 @@ Reviewers: svoboda
 ``` c
 int remainder(int x) {
   int y;
-  /* Initialize y with an untrusted value, which could be 0 */
+  // Initialize y with an untrusted value, which could be 0
   return x % y;  // Undefined Behavior
 }
 ```
@@ -728,12 +732,11 @@ void f(void) {
   int *next_num_ptr = nums;
   int free_bytes;
 
-  /* ... increment next_num_ptr as array fills */
+  // Increment next_num_ptr as array fills...
 
   free_bytes = c_str - (char **)next_num_ptr;   // Undefined Behavior
-  /* next_num_ptr part of name array, even if it equals c_str! */
-  
-  /* ... */
+  // next_num_ptr part of name array, even if it equals c_str!
+  // ...
 }
 ```
 
@@ -765,7 +768,8 @@ Reviewers: svoboda
 
 ``` c
 #include <stdlib.h>
-size_t size = 1 + (SIZE_MAX / 2); // this assumes sizeof(size_t) == sizeof(ptrdiff_t)
+
+size_t size = 1 + (SIZE_MAX / 2);     // Assumes sizeof(size_t) == sizeof(ptrdiff_t)
 char* x = malloc(size);
 assert(x != 0);
 char* start = x;
@@ -798,7 +802,7 @@ Reviewers: svoboda
 void func(signed long si_a, signed long si_b) {
   signed long result;
   if (si_a > (LONG_MAX >> si_b)) {
-    /* Handle error */
+    // Handle Error
   } else {
     result = si_a << si_b;  // Undefined Behavior
   }
@@ -832,7 +836,7 @@ char bytes[limit];
 int *p1 = (int*) &(bytes[0]);
 int *p2 = (int*) &(bytes[1]); // overlaps with p1 (unless sizeof(int) == 1)
 *p1 = 123;
-*p2 = *p1; // Undefined Behavior
+*p2 = *p1;                    // Undefined Behavior
 ```
 
 Reviewers: coates, svoboda
@@ -910,7 +914,7 @@ Note: Removed from J.2. by [N3244](https://www.open-std.org/jtc1/sc22/wg14/www/d
 
 ``` c
 struct {
-  int:3; // un-named bit-field
+  int:3;    // Un-named bit-field
 } myStruct; // Undefined Behavior
 ```
 
@@ -923,7 +927,7 @@ Reviewers: coates, svoboda
 
 struct S {
   size_t len;
-  char buf[];  /* Flexible array member */
+  char buf[];  // Flexible array member
 };
 
 const char *find(const struct S *s, int c) {
@@ -941,7 +945,7 @@ const char *find(const struct S *s, int c) {
 void g(void) {
   struct S *s = (struct S *)malloc(sizeof(struct S));
   if (s == NULL) {
-    /* Handle error */
+    // Handle Error
   }
   s->len = 0;
   find(s, 'a');
@@ -990,7 +994,7 @@ void func(void) {
   ipp = (int**) &ip;  // Undefined Behavior
   *ipp = &i;          // Valid
   if (*ip != 0) {     // Valid
-    /* ... */
+    // ...
   }
 }
 ```
@@ -1060,7 +1064,7 @@ int main(void) {
   a = &c[0];
   b = &c[1];
   a = b;      // Undefined Behavior
-  /* ... */
+  // ...
 }
 ```
 
@@ -1082,6 +1086,7 @@ Note: Removed from J.2. by [N3244](https://www.open-std.org/jtc1/sc22/wg14/www/d
 
 ``` c
 #include <stdnoreturn.h>
+
 _Noreturn void f(void) {
   return;  // Undefined Behavior at run-time
 }
@@ -1098,6 +1103,7 @@ Note: Removed from J.2. by [N3244](https://www.open-std.org/jtc1/sc22/wg14/www/d
 ``` c
 // In file1.c:
 alignas(16) int a;
+
 
 // In file2.c:
 alignas(32) int a; // Undefined Behavior
@@ -1125,10 +1131,10 @@ int size = -4;
 // This creates a VLA.
 int arr[size];
 
-printf("%d\n",sizeof(arr));
+printf("%d\n",sizeof(arr));  // Undefined Behavior
 ```
 
-Reviewers:
+Reviewers: svoboda
 
 ### 73\. In a context requiring two array types to be compatible, they do not have compatible element types, or their size specifiers evaluate to unequal values (6.7.7.3).
 
@@ -1159,7 +1165,7 @@ int average(int numbers[static size]) {
 
 int main(void) {
   int a[3] = { 4, 1002, 27 };
-  int result = average(a); // Undefined Behavior, array too small
+  int result = average(a);   // Undefined Behavior, array too small
   printf("Average is %d\n", result);
 }
 ```
@@ -1259,7 +1265,7 @@ Reviewers: svoboda
 ``` c
 extern int x;
 
-x = 3; // Undefined Behavior if x is never defined
+x = 3;   // Undefined Behavior if x is never defined
 printf("x is %d!\n", x);
 ```
 
@@ -1268,7 +1274,7 @@ Reviewers: svoboda
 ### C18-87. An adjusted parameter type in a function definition is not a complete object type (6.9.1).
 
 ``` c
-// no previous definition of struct foo
+// No previous definition of struct foo
 void f(struct foo x) {}   // Undefined Behavior
 ```
 
@@ -1279,18 +1285,19 @@ Reviewers: j.myers
 ### 85\. A function that accepts a variable number of arguments is defined without a parameter type list that ends with the ellipsis notation (6.9.2).
 
 ``` c
+// In file1.c:
 int add(int first, int second) {
   return first + second;
 }
-```
 
-``` c
+
+// In file2.c:
 #include <stdio.h>
 
 int add(int first, int second, ...);
 
 int main () {
-  int result = add(2, 3, 5, 7, 11, -1); // Undefined Behavior
+  int result = add(2, 3, 5, 7, 11, -1);   // Undefined Behavior
   printf("Sum is %d\n", result);
   return 0;
 }
@@ -1378,17 +1385,17 @@ Reviewers: svoboda
 #include <string.h>
 
 void func(const char *src) {
-  /* Validate the source string; calculate size */
+  // Validate the source string; calculate size
   char *dest;
-  /* malloc() destination string */
+  // malloc() destination string
   memcpy(dest, src,
     #ifdef PLATFORM1
-      12  // Undefined Behavior if memcpy() defined as macro
+      12  // Undefined Behavior, if memcpy() defined as macro
     #else
       24
     #endif
   );
-  /* ... */
+  // ...
 );
 ```
 
@@ -1478,7 +1485,8 @@ Reviewers: svoboda
 ### 100\. A file with the same name as one of the standard headers, not provided as part of the implementation, is placed in any of the standard places that are searched for included source files (7.1.2).
 
 ``` c
-#include "stdio.h"  // Undefined Behavior, distinct from <stdio.h> */
+#include "stdio.h"
+// Undefined Behavior, distinct from <stdio.h> */
 ```
 
 Cite: CERT C Rec PRE04-C 1st NCCE
@@ -1536,12 +1544,12 @@ Reviewers: svoboda
 
 void *malloc(size_t nbytes) {  // Undefined Behavior
   void *ptr;
-  /* Allocate storage from own pool and set ptr */
+  // Allocate storage from own pool and set ptr
   return ptr;
 }
 
 void free(void *ptr) {         // Undefined Behavior
-  /* Return storage to own pool */
+  // Return storage to own pool
 }
 ```
 
@@ -1592,7 +1600,7 @@ void f1(size_t nchars) {
   const size_t n = nchars + 1;
   if (p) {
     memset(p, 0, n); // Undefined Behavior, 1-byte buffer overflow
-    /* ... */
+    // ...
   }
 }
 ```
@@ -1626,11 +1634,9 @@ Reviewers: svoboda
 ``` c
 #include <assert.h>
 
-int a[5];
+int a[5];   // An array is considered an aggregate type (C23 s6.2.5p26).
 assert(a);  // Undefined Behavior
 ```
-
-NOTE: An array is considered an aggregate type (s6.2.5p26).
 
 Reviewers: svoboda
 
@@ -1765,7 +1771,9 @@ Reviewers: svoboda
 
 char *locale1 = setlocale(LC_ALL, "");
 assert(locale1);
-/* ... */
+
+// ...
+
 char *locale2 = setlocale(LC_ALL, "");
 int size = strlen(locale1);  // Undefined Behavior
 ```
@@ -1804,8 +1812,9 @@ Reviewers: svoboda
 
 ``` c
 double complex p = CMPLX( 2, 3); // 2 + 3i
-if (isfinite(p) // Undefined Behavior
+if (isfinite(p) {  // Undefined Behavior
   // ...
+}
 ```
 
 Reviewers: svoboda
@@ -1830,12 +1839,12 @@ void f(void) {
   if (i == 0) {
     g();
   } else {
-    /* longjmp was invoked */
+    // longjmp was invoked
   }
 }
 
 void g(void) {
-  /* ... */
+  // ...
   longjmp(buf, 1);
 }
 ```
@@ -1872,7 +1881,7 @@ static void setup(void) {
 
 void do_stuff(void) {
   void (*b)(void) = bad;
-  /* ... */
+  // ...
   longjmp(buf, 1);   // Undefined Behavior
 }
 
@@ -1900,14 +1909,14 @@ void f(void) {
   int i = 0;
   if (setjmp(buf) != 0) {
     printf("%i\n", i);      // Undefined Behavior
-    /* ... */
+    // ...
   }
   i = 2;
   g();
 }
 
 void g(void) {
-  /* ... */
+  // ...
   longjmp(buf, 1);
 }
 ```
@@ -1938,7 +1947,7 @@ Reviewers: svoboda
 volatile sig_atomic_t denom;
 
 void sighandle(int s) {
-  /* Fix the offending volatile */
+  // Fix the offending volatile
   if (denom == 0) {
     denom = 1;
   }
@@ -1954,7 +1963,7 @@ int main(int argc, char *argv[]) {
 
   if (end == argv[1] || 0 != *end ||
      ((LONG_MIN == temp || LONG_MAX == temp) && errno == ERANGE)) {
-    /* Handle error */
+    // Handle Error
   }
 
   denom = (sig_atomic_t)temp;
@@ -1981,31 +1990,31 @@ Reviewers: svoboda
 
 ``` c
 void term_handler(int signum) {
-  /* SIGTERM handling specific */
+  // SIGTERM handling specific ...
 }
 
 void int_handler(int signum) {
-  /* SIGINT handling specific */
+  // SIGINT handling specific ...
   if (raise(SIGTERM) != 0) {   // Undefined Behavior
-    /* Handle error */
+    // Handle Error
   }
 }
 
 int main(void) {
   if (signal(SIGTERM, term_handler) == SIG_ERR) {
-    /* Handle error */
+    // Handle Error
   }
   if (signal(SIGINT, int_handler) == SIG_ERR) {
-    /* Handle error */
+    // Handle Error
   }
 
-  /* Program code */
+  // Program code ...
 
   if (raise(SIGINT) != 0) {
-    /* Handle error */
+    // Handle Error
   }
 
-  /* More code */
+  // More code ...
 
   return EXIT_SUCCESS;
 }
@@ -2024,7 +2033,7 @@ char *err_msg;
 
 void handler(int signum) {
   if ((strcpy(err_msg, "SIGINT detected.")) == err_msg){ // Undefined Behavior
-    /* ... */
+    // ...
   }
 }
 
@@ -2033,13 +2042,13 @@ int main(void) {
 
   err_msg = (char *)malloc(MAX_MSG_SIZE);
   if (err_msg == NULL) {
-    /* Handle error condition */
+    /// Handle Error
   }
   if ((strcpy(err_msg, "No errors yet.")) == err_msg) {
-    /* ... */
+    // ...
   }
 
-  /* Main code loop */
+  // Main code loop ...
 
   return EXIT_SUCCESS;
 }
@@ -2062,17 +2071,17 @@ void handler(int signum) {
   pfv old_handler = signal(signum, SIG_DFL);
   if (old_handler == SIG_ERR) {
     perror("SIGINT handler"); // Undefined Behavior
-    /* Handle error */
+    // Handle Error
   }
 }
 int main(void) {
   pfv old_handler = signal(SIGINT, handler);
   if (old_handler == SIG_ERR) {
     perror("SIGINT handler");
-    /* Handle error */
+    // Handle Error
   }
 
-  /* Main code loop */
+  // Main code loop
 
   return EXIT_SUCCESS;
 }
@@ -2106,12 +2115,10 @@ void log_message(char *info1, char *info2) {
     bufsize = sizeof(buf0);
   }
 
-  /*
-  * Try to fit a message into buf, else reallocate
-  * it on the heap and then log the message.
-  */
+  // Try to fit a message into buf, else reallocate
+  // it on the heap and then log the message.
 
-  /* Undefined Behavior if SIGINT is raised here */
+  // Undefined Behavior if SIGINT is raised here
 
   if (buf == buf0) {
     buf = NULL;
@@ -2120,18 +2127,18 @@ void log_message(char *info1, char *info2) {
 
 int main(void) {
   if (signal(SIGINT, handler) == SIG_ERR) {
-    /* Handle error */
+    // Handle Error
   }
   char *info1;
   char *info2;
 
-  /* info1 and info2 are set by user input here */
+  // info1 and info2 are set by user input here
 
   if (setjmp(env) == 0) {
     while (1) {
-      /* Main loop program code */
+      // Main loop program code ...
       log_message(info1, info2);
-      /* More program code */
+      // More program code ...
     }
   } else {
     log_message(info1, info2);
@@ -2157,22 +2164,22 @@ void handler(int signum) {
   flag = 1;
 }
 
-/* Runs until user sends SIGUSR1 */
+// Runs until user sends SIGUSR1
 int func(void *data) {
   while (!flag) {
-    /* ... */
+    // ...
   }
   return 0;
 }
 
 int main(void) {
-  signal(SIGUSR1, handler);  /* Undefined Behavior */
+  signal(SIGUSR1, handler);  // Undefined Behavior
   thrd_t tid;
 
   if (thrd_success != thrd_create(&tid, func, NULL)) {
-    /* Handle error */
+    // Handle Error
   }
-  /* ... */
+  // ...
   return 0;
 }
 ```
@@ -2251,7 +2258,7 @@ Reviewers: svoboda
 void f(int last, ...) {
   va_list args;
   va_start( args, last);
-  /* Undefined Behavior, missing va_end(args) */
+  // Undefined Behavior, missing va_end(args)
 }
 ```
 
@@ -2404,6 +2411,8 @@ void f(float last, ...) {
 
 Reviewers: svoboda
 
+Note: Removed from C23
+
 ### 145\. The macro definition of a generic function is suppressed to access an actual function (7.17.1, 7.18).
 
 ``` c
@@ -2473,7 +2482,7 @@ typedef struct st {
   int num2;
 } binary_s;
 
-size_t z = offsetof( binary_s, num3); // Oops, meant num2, Undefined Behavior
+size_t z = offsetof( binary_s, num3); // Undefined Behavior, should be num2
 ```
 
 Reviewers: svoboda
@@ -2481,7 +2490,7 @@ Reviewers: svoboda
 ### 150\. The argument in an instance of one of the integer-constant macros is not a decimal, octal, or hexadecimal constant, or it has a value that exceeds the limits for the corresponding type (7.22.4).
 
 ``` c
-  unsigned char i = UINT8_C(0x123); // Undefined Behavior, 0x123 > 2^8
+unsigned char i = UINT8_C(0x123); // Undefined Behavior, 0x123 > 2^8
 ```
 
 Reviewers: svoboda
@@ -2497,7 +2506,7 @@ int main(void) {
 
   wchar_t wide_line[80];
   fgetws(wide_line, sizeof(wchar_t) * sizeof(wide_line), in);
-  // the stream is now oriented for wide characters
+  // The stream is now oriented for wide characters
   wprintf(L"The first line is: %ls", wide_line);
 
   char line[80];
@@ -2563,13 +2572,13 @@ void f(const char *filename, char append_data[BUFSIZ]) {
 
   file = fopen(filename, "a+");
   if (file == NULL) {
-    /* ... */
+    // ...
   }
   if (fwrite(append_data, sizeof(char), BUFSIZ, file) != BUFSIZ) {
-    /* ... */
+    // ...
   }
   if (fread(data, sizeof(char), BUFSIZ, file) != 0) {  // Undefined Behavior
-    /* ... */
+    // ...
   }
   
   fclose(file);
@@ -2590,9 +2599,9 @@ char buf[SIZE];
 FILE _file = fopen("foo", "r");
 if (file == 0 ||
     setvbuf(file, buf, buf ? IOFBF : IONBF, SIZE) != 0) {
-  /* Handle error */
+  // Handle Error
 }
-/* ... */
+// ...
 buf[0] = '\0';  // Undefined Behavior
 ```
 
@@ -2604,7 +2613,7 @@ Reviewers: svoboda, j.myers
 void f(void) {
   const char *error_msg = "Resource not available to user.";
   int error_type = 3;
-  /* ... */
+  // ...
   printf("Error (type %s): %d\n", error_type, error_msg);  // Undefined Behavior
 }
 ```
@@ -2620,7 +2629,8 @@ Reviewers: svoboda
 #include <locale.h>
 
 setlocale(LC_ALL, "UTF-8");
-/* In UTF-8: the Euro symbol == '€' == U+20AC == \xE2 \x82 \xAC == \342 \202 \254 */
+
+// In UTF-8: the Euro symbol == '€' == U+20AC == \xE2 \x82 \xAC == \342 \202 \254
 const char s[] = {'\xE2', '\0'};  // invalid UTF-8
 printf(s);   // Undefined Behavior in UTF-8 locale
 ```
@@ -2669,7 +2679,8 @@ Reviewers: svoboda, j.myers
 #include <stdio.h>
 
 void f(int* pi) {
-  printf("%lp", pi);  /* 'l' not defined for %p */ }
+  printf("%lp", pi);  // 'l' not defined for %p
+}
 ```
 
 Reviewers: svoboda, j.myers
@@ -2715,7 +2726,7 @@ Reviewers: svoboda, j.myers
 #include <stdio.h>
 
 void f(int i) {
-  printf("%q", i);  /* %q not defined */
+  printf("%q", i);  // Undefined behavior, %q not defined
 }
 ```
 
@@ -2740,7 +2751,7 @@ Reviewers: svoboda, j.myers
 #include <limits.h>
 #include <stdarg.h>
 
-/* Assume this function is called with >INT_MAX arguments */
+// Assume this function is called with >INT_MAX arguments
 void f(int unused, ...) {
   va_list args;
   va_start( args, unused);
@@ -2767,7 +2778,7 @@ Reviewers: svoboda
 long num_long;
 
 if (scanf("%ld", &num_long) != 1) { // Undefined Behavior
-  /* Handle error */
+  // Handle Error
 }
 ```
 
@@ -2793,7 +2804,7 @@ Reviewers: svoboda
 #include <locale.h>
 
 setlocale(LC_ALL, "UTF-8");
-/* In UTF-8: the Euro symbol == '€' == U+20AC == \xE2 \x82 \xAC == \342 \202 \254 */
+// In UTF-8: the Euro symbol == '€' == U+20AC == \xE2 \x82 \xAC == \342 \202 \254
 const char invalid[] = {'\xE2', '\0'};  // invalid UTF-8
 char c;
 sscanf(invalid, "%c", &c);  // Undefined Behavior in UTF-8 locale
@@ -2822,7 +2833,7 @@ Reviewers: svoboda, j.myers
 void f(int first, ...) {
   int local = 0;
   va_list args;
-  va_start( args, local);          // Oops, not first fixed arg
+  va_start( args, local);          // Oops, not first fixed arg!
   vprintf("Hello, %s\n", args);    // Undefined Behavior
 }
 ```
@@ -2838,7 +2849,7 @@ FILE* f = fopen("foo", "r");
 if (f == NULL) {
   printf("Can't open foo\n");
 }
-fgets( buf, buf_size, f);       // Oops, no check for failure
+fgets( buf, buf_size, f);       // Oops, no check for failure!
 printf("Buf is now %s\n", buf); // Undefined Behavior if fgets() returned NULL
 ```
 
@@ -2847,7 +2858,7 @@ Reviewers: svoboda
 ### 176\. The n parameter is negative or zero for a call to fgets or fgetws. (7.23.7.2, 7.31.3.2).
 
 ``` c
-const int buf_size = -1;      // Oops, should be > 0
+const int buf_size = -1;      // Oops, should be > 0!
 char buf[buf_size];
 FILE* f = fopen("foo", "r");
 if (f == NULL) {
@@ -2867,7 +2878,7 @@ if (f == NULL) {
 }
 assert(ftell( f) == 0);
 int c = 'A';
-c = ungetc( c, f); // Undefined Behavior
+c = ungetc( c, f);   // Undefined Behavior
 ```
 
 Reviewers: svoboda
@@ -2883,8 +2894,8 @@ const int buf_size = 125;
 char buffer[buf_size];
 size_t bytes = fread( buffer, 1, buf_size, f);
 printf("Read %ld bytes\n", bytes);
-if (bytes < buf_size) { // uh-oh, error
-  long pos = ftell( f); // Undefined Behavior if fread() had error
+if (bytes < buf_size) {   // uh-oh, error
+  long pos = ftell( f);   // Undefined Behavior if fread() had error
   printf("File is at %lu position \n", pos);
 }
 ```
@@ -2931,17 +2942,17 @@ Reviewers: svoboda
 FILE *opener(const char *filename) {
   fpos_t offset;
   if (filename == NULL) {
-    /* ... */
+    // ...
   }
 
   FILE *file = fopen(filename, "r");
   if (file == NULL) {
-    /* ... */
+    // ...
   }
 
   memset(&offset, 0, sizeof(offset));
   if (fsetpos(file, &offset) != 0) {  // Undefined Behavior
-    /* ... */
+    // ...
   }
 
   return file;
@@ -2961,7 +2972,7 @@ Reviewers: svoboda
 size_t size = 0;
 int _array = (int_) malloc(size * sizeof(int));
 assert(array);
-array[0] = 123;  // out-of-bounds write
+array[0] = 123;  // Undefined Behavior, out-of-bounds write
 ```
 
 Reviewers: svoboda, j.myers
@@ -2969,7 +2980,7 @@ Reviewers: svoboda, j.myers
 ### 183\. The value of a pointer that refers to space deallocated by a call to the free or realloc function is used (7.24.3).
 
 ``` c
-struct List { struct List *next; /* ... */ };
+struct List { struct List *next; // ... };
 
 void free_list(struct List *head) {
   for (; head != NULL; head = head->next) {  // Undefined Behavior
@@ -2989,14 +3000,14 @@ void f(size_t num_elem) {
   int error_condition = 0;
   int *x = (int *)malloc(num_elem * sizeof(int));
   if (x == NULL) {
-    /* ... */
+    // ...
   }
-  /* ... */
+  // ...
   if (error_condition == 1) {
-    /* ... */
+    // ...
     free(x);
   }
-  /* ... */
+  // ...
   free(x);   // Undefined Behavior
   x = NULL;
 }
@@ -3046,7 +3057,7 @@ int *resize_array(int *array, size_t count) {
 void func(void) {
   int *array = (int *)malloc(OLD_SIZE * sizeof(int));
   if (0 == array) {
-    /* Handle error */
+    // Handle Error
   }
 
   for (size_t i = 0; i < OLD_SIZE; ++i) {
@@ -3055,7 +3066,7 @@ void func(void) {
 
   array = resize_array(array, NEW_SIZE);
   if (0 == array) {
-    /* Handle error */
+    // Handle Error
   }
 
   for (size_t i = 0; i < NEW_SIZE; ++i) {
@@ -3074,14 +3085,14 @@ Reviewers: svoboda
 #include <stdlib.h>
 
 void exit1(void) {
-  /* ... Cleanup code ... */
+  // Cleanup code ...
   return;
 }
 
 void exit2(void) {
   extern int some_condition;
   if (some_condition) {
-    /* ... More cleanup code ... */
+    // More cleanup code ...
     exit(0);  // Undefined Behavior when invoked within exit()
   }
   return;
@@ -3089,12 +3100,12 @@ void exit2(void) {
 
 int main(void) {
   if (atexit(exit1) != 0) {
-    /* Handle error */
+    // Handle Error
   }
   if (atexit(exit2) != 0) {
-    /* Handle error */
+    // Handle Error
   }
-  /* ... Program code ... */
+  // Program code ...
   return 0;
 }
 ```
@@ -3118,7 +3129,7 @@ void exit1(void) {
 
 int main(void) {
   if (atexit(exit1) != 0) {
-    /* Handle error */
+    // Handle Error
   }
   if (setjmp(env) == 0) {
     exit(0);
@@ -3143,7 +3154,7 @@ void f3(void) {
     if (slash) {
       *slash = '\0';  // Undefined Behavior
     }
-    /* use shell_dir */
+    // Use shell_dir...
   }
 }
 ```
@@ -3156,12 +3167,12 @@ Reviewers: svoboda
 
 ``` c
 void exit_handler(void) {
-  raise(SIGINT); // Undefined Behavior
+  raise(SIGINT);   // Undefined Behavior
 }
 
 int main(void) {
   if (atexit(exit_handler) != 0) {
-    /* Handle error */
+    // Handle Error
   }
   quick_exit(0);
   return 0;
@@ -3190,7 +3201,7 @@ int compare(const void *a, const void *b) {
 }
 
 int *arr = NULL;
-qsort(arr, 0, sizeof(int), compare);
+qsort(arr, 0, sizeof(int), compare);  // Undefined Behavior
 ```
 
 Reviewers: coates, svoboda
@@ -3201,13 +3212,13 @@ Reviewers: coates, svoboda
 #include <stdlib.h>
 
 int compare(const void *a, const void *b) {
-    *(int *)a = *(int *)a + 1;  // Modify array contents!
+    *(int *)a = *(int *)a + 1;        // Modify array contents!
     return (*(int *)a - *(int *)b);
 }
 
 int arr[] = {2, 1, 4, 1, 5, 9, 2, 6};
 size_t n = sizeof(arr) / sizeof(arr[0]);
-qsort(arr, n, sizeof(int), compare);
+qsort(arr, n, sizeof(int), compare);  // Undefined Behavior
 ```
 
 Reviewers: coates, svoboda
@@ -3219,7 +3230,7 @@ int compare(const void *a, const void *b) {
   return *(int*)a - *(int*)b;
 }
 
-int arr[] = {2, 3, 5, 11, 7}; // Oops, mis-ordered array
+int arr[] = {2, 3, 5, 11, 7}; // Oops, mis-ordered array!
 int n = sizeof(arr)/sizeof(arr[0]);
 int key = 7;
 int *result = (int*)bsearch(&key, arr, n, sizeof(int), compare);
@@ -3244,7 +3255,7 @@ wchar_t wstr[50];
 memset(wstr, 0, sizeof(wstr));
 int counter = 0;
 setlocale(LC_CTYPE, "HYPO");                // Use hypothetical encoding
-/* Suppose standard input contains the single line: ↑□X□Y↓ */
+// Suppose standard input contains the single line: ↑□X□Y↓
 fgets(str, sizeof(str), stdin);             // str == "↑□X□Y↓"
 counter += mbtowc(wstr, str, 4);            // wstr == "□X", upper state
 setlocale(LC_CTYPE, "C");                   // state changed
@@ -3287,9 +3298,8 @@ Reviewers: svoboda, j.myers
 ``` c
 char src[] = "This is a test";
 const int string_size = strlen(src) + 1;
-char dest[string_size - 1];   // Oops, too small
-int length = strxfrm(dest, src, string_size);
-// Undefined Behavior
+char dest[string_size - 1];                     // Oops, too small!
+int length = strxfrm(dest, src, string_size);   // Undefined Behavior
 ```
 
 Reviewers: svoboda
@@ -3310,14 +3320,14 @@ char str[] = "?a???b,,,#c";
 char *t = strtok(str, "?");
 thrd_t thr;
 if (thrd_success != thrd_create(&thr, bar, 0)) {
-  /* Handle error */
+  // Handle Error
 }
 
 t = strtok(NULL, ","); // Undefined Behavior
 
 int retval;
 if (thrd_success != thrd_join(thr, &retval)) {
-  /* Handle error */
+  // Handle Error
 }
 ```
 
@@ -3343,7 +3353,7 @@ Reviewers: svoboda, j.myers
 
 char* inval = strerror(EINVAL);
 char* perm = strerror(EPERM);
-printf("Invalid: %s\n", inval); /* Undefined Behavior, invalidated by perm */
+printf("Invalid: %s\n", inval); // Undefined Behavior, invalidated by perm
 printf("Permission: %s\n", perm);
 ```
 
@@ -3353,7 +3363,7 @@ Reviewers: svoboda, j.myers
 
 ``` c
 double complex dc = CMPLX( 2, 3); // 2 + 3i
-double result = dsqrt(dc);   // Undefined Behavior
+double result = dsqrt(dc);        // Undefined Behavior
 ```
 
 Reviewers: svoboda
@@ -3413,15 +3423,15 @@ Reviewers: svoboda
 
 mtx_t m;
 if (thrd_success != mtx_init(&m, mtx_plain)) {
-  /* Handle error */
+  // Handle Error
 }
 
 if (thrd_success != mtx_lock(&m)) {
-  /* Handle error */
+  // Handle Error
 }
 
 if (thrd_success != mtx_lock(&m)) {  // Undefined Behavior
-  /* Handle error */
+  // Handle Error
 }
 
 mtx_destroy(&m);
@@ -3436,18 +3446,18 @@ Reviewers: svoboda, j.myers
 #include <time.h>
 
 mtx_t m;
-if (thrd_success != mtx_init(&m, mtx_plain)) { /* Oops, should be mtx_timed */
-  /* Handle error */
+if (thrd_success != mtx_init(&m, mtx_plain)) { // Oops, should be mtx_timed!
+  // Handle Error
 }
 
 struct timespec ts;
 if (0 == timespec_get(&ts, TIME_UTC)) {
-  /* Handle error */
+  // Handle Error
 }
-ts.tv_sec += 1; /* 1 second from now */
+ts.tv_sec += 1; // 1 second from now
 
 if (thrd_success != mtx_timedlock(&m, &ts)) { // Undefined Behavior
-  /* Handle error */
+  // Handle Error
 }
 
 mtx_destroy(&m);
@@ -3462,11 +3472,11 @@ Reviewers: svoboda, j.myers
 
 mtx_t m;
 if (thrd_success != mtx_init(&m, mtx_plain)) {
-  /* Handle error */
+  // Handle Error
 }
 
 if (thrd_success != mtx_unlock(&m)) {   // Undefined Behavior
-  /* Handle error */
+  // Handle Error
 }
 
 mtx_destroy(&m);
@@ -3481,7 +3491,7 @@ Reviewers: svoboda, j.myers
 #include <threads.h>
 
 int thread_func(void *arg) {
-  /* Do work */
+  // Do work ...
   thrd_detach(thrd_current());
   return 0;
 }
@@ -3490,12 +3500,12 @@ int main(void) {
   thrd_t t;
 
   if (thrd_success != thrd_create(&t, thread_func, NULL)) {
-    /* Handle error */
+    // Handle Error
     return 0;
   }
 
   if (thrd_success != thrd_join(t, 0)) {  // Undefined Behavior
-    /* Handle error */
+    // Handle Error
     return 0;
   }
   return 0;
@@ -3514,14 +3524,14 @@ Reviewers: svoboda
 void destructor(void* arg) {
   tss_t key;
   if (thrd_success != tss_create(&key, 0)) { // Undefined Behavior
-    /* Handle error */
+    // Handle Error
   }
 }
 
 int func(void*) {
   tss_t key;
   if (thrd_success != tss_create(&key, destructor)) {
-    /* Handle error */
+    // Handle Error
   }
   static char str[] = "Hello";
   tss_set(key, str);
@@ -3531,12 +3541,12 @@ int func(void*) {
 int foo(void*) {
   thrd_t thr;
   if (thrd_success != thrd_create(&thr, func, 0)) {
-    /* Handle error */
+    // Handle Error
   }
 
   int retval;
   if (thrd_success != thrd_join(thr, &retval)) {
-    /* Handle error */
+    // Handle Error
   }
   return 0;
 }
@@ -3552,26 +3562,26 @@ Reviewers: svoboda, j.myers
 void destructor(void* arg) {
   tss_t key;
   if (thrd_success != tss_create(&key, 0)) { // Undefined Behavior
-    /* Handle error */
+    // Handle Error
   }
 }
 
 int func(void*) {
   tss_t key;
   static char str[] = "Hello";
-  tss_set(key, str); /* Undefined Behavior, key not initialized by tss_create() */
+  tss_set(key, str); // Undefined Behavior, key not initialized by tss_create()
   return 0;
 }
 
 int foo(void*) {
   thrd_t thr;
   if (thrd_success != thrd_create(&thr, func, 0)) {
-    /* Handle error */
+    // Handle Error
   }
 
   int retval;
   if (thrd_success != thrd_join(thr, &retval)) {
-    /* Handle error */
+    // Handle Error
   }
   return 0;
 }
@@ -3591,7 +3601,7 @@ char* now = 0;
 int bar(void*) {
   time_t n1;
   if ((time_t) -1 == time(&n1)) {
-    /* Handle error */
+    // Handle Error
   }
   struct tm* n2 = localtime(&n1);
   now = asctime(n2);
@@ -3601,12 +3611,12 @@ int bar(void*) {
 void foo(void) {
   thrd_t thr;
   if (thrd_success != thrd_create(&thr, bar, 0)) {
-    /* Handle error */
+    // Handle Error
   }
 
   int retval;
   if (thrd_success != thrd_join(thr, &retval)) {
-    /* Handle error */
+    // Handle Error
   }
 
   printf("The time is %s\n", now); // Undefined Behavior
@@ -3622,7 +3632,7 @@ Reviewers: svoboda, j.myers
 
 void func(struct tm *time_tm) {
   char *time = asctime(time_tm);  // Undefined Behavior
-  /* ... */
+  // ...
 }
 ```
 
@@ -3637,10 +3647,10 @@ Reviewers: svoboda
 #include <locale.h>
 
 setlocale(LC_ALL, "UTF-8");
-/* In UTF-8: the Euro symbol == '€' == U+20AC == \xE2 \x82 \xAC == \342 \202 \254 */
+// In UTF-8: the Euro symbol == '€' == U+20AC == \xE2 \x82 \xAC == \342 \202 \254
 const char invalid[] = {'\xE2', '\0'};   // invalid UTF-8
 fwprintf(stdout, L"The string is %ls\n", invalid);
-/* Undefined Behavior in UTF-8 locale */
+// Undefined Behavior in UTF-8 locale
 ```
 
 Reviewers: svoboda, j.myers
