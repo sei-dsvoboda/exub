@@ -18,7 +18,18 @@ Reviewers: svoboda
 
 ### 3\. Token concatenation produces a character sequence matching the syntax of a universal character name (5.1.1.2).
 
-CERT C Rule PRE30-C 1st NCCE 2.1.1
+``` c
+#define assign(uc1, uc2, val) uc1##uc2 = val
+
+void func(void) {
+  int \u0401;
+  /* ... */
+  assign(\u04, 01, 4);   // Undefined Behavior
+  /* ... */
+}
+```
+
+Cite: CERT C Rule PRE30-C 1st NCCE 2.1.1
 
 Reviewers: svoboda, s.maddanimath
 
@@ -36,7 +47,28 @@ Reviewers: s.maddanimath, svoboda, UBSG, j.myers
 
 ### 5\. The execution of a program contains a data race (5.1.2.5).
 
-CERT C Rule CON32-C 1st NCCE 14.3.1, CON40-C 1st NCCE 14.11.1
+``` c
+#include <stdatomic.h>
+#include <stdbool.h>
+
+static atomic_bool flag = ATOMIC_VAR_INIT(false);
+
+void init_flag(void) {
+  atomic_init(&flag, false);
+}
+
+void toggle_flag(void) {
+  bool temp_flag = atomic_load(&flag);
+  temp_flag = !temp_flag;
+  atomic_store(&flag, temp_flag);  // Undefined Behavior, race condition
+}
+
+bool get_flag(void) {
+  return atomic_load(&flag);   // Undefined Behavior, race condition
+}
+```
+
+Cite: CERT C Rule CON32-C 1st NCCE 14.3.1, CON40-C 1st NCCE 14.11.1
 
 Reviewers: svoboda
 
@@ -64,7 +96,21 @@ Reviewers: svoboda, USBG, j.myers, s.maddanimath
 
 ### 8\. The same identifier has both internal and external linkage in the same translation unit (6.2.2).
 
-CERT C Rule DCL36-C 1st NCCE 3.3.1
+``` c
+int i1 = 10;         // Definition, external linkage
+static int i2 = 20;  // Definition, internal linkage
+extern int i3 = 30;  // Definition, external linkage
+int i4;              // Tentative definition, external linkage
+static int i5;       // Tentative definition, internal linkage
+
+int i1;              // Valid tentative definition
+int i2;              // Undefined Behavior, linkage disagreement with previous
+int i3;              // Valid tentative definition
+int i4;              // Valid tentative definition
+int i5;              // Undefined Behavior, linkage disagreement with previous
+```
+
+Cite: CERT C Rule DCL36-C 1st NCCE 3.3.1
 
 Reviewers: svoboda, s.maddanimath
 
@@ -84,8 +130,22 @@ Reviewers: uecker, j.myers
 
 ### 9\. An object is referred to outside of its lifetime (6.2.4).
 
-CERT C Rule DCL30-C 1st NCCE 3.1.1, 2nd NCCE 3.1.4, 3rd NCCE 3.1.6  
-CERT C Rule EXP35-C 1st NCCE 4.5.1, 2nd NCCE 4.5.3
+``` c
+void squirrel_away(char **ptr_param) {
+  char local[10];
+  /* Initialize array */
+  *ptr_param = local;
+}
+
+void rodent(void) {
+  char *ptr;
+  squirrel_away(&ptr);
+  /* Undefined Behavior if ptr is ever read here */
+}
+```
+
+Cite: CERT C Rule DCL30-C 1st NCCE 3.1.1, 2nd NCCE 3.1.4, 3rd NCCE 3.1.6
+Cite: CERT C Rule EXP35-C 1st NCCE 4.5.1, 2nd NCCE 4.5.3
 
 Reviewers: svoboda, s.maddanimath
 
@@ -136,7 +196,7 @@ int is_negative(int number) {
 }}
 ```
 
-Cite: TS17961 5.35 \[uninitref\] EXAMPLE 1, 2
+Cite: TS17961 5.35 \[uninitref\] EXAMPLE 1, 2,
 CERT C Rule EXP33-C 4th NCCE 4.3.9,
 CERT C Rec MSC22-C 3rd NCCE
 
@@ -210,13 +270,28 @@ Reviewers: svoboda
 
 ### 16\. Conversion to or from an integer type produces a value outside the range that can be represented (6.3.1.4).
 
-CERT C Rule FLP34-C 1st NCCE 6.3.1, FLP36-C 1st NCCE 6.4.1
+``` c
+void func(float f_a) {
+  int i_a;
+  i_a = f_a;  // Undefined Behavior if the integral part of f_a cannot be represented.
+}
+```
+
+Cite: CERT C Rule FLP34-C 1st NCCE 6.3.1, FLP36-C 1st NCCE 6.4.1
 
 Reviewers: svoboda
 
 ### 17\. Demotion of one real floating type to another produces a value outside the range that can be represented (6.3.2.1).
 
-CERT C Rule FLP34-C 2nd NCCE 6.3.3
+``` c
+void func(double d_a, long double big_d) {
+  double d_b = (float)big_d;  // Undefined Behavior, if outside range
+  float f_a = (float)d_a;     // Undefined Behavior, if outside range
+  float f_b = (float)big_d;   // Undefined Behavior, if outside range
+}
+```
+
+Cite: CERT C Rule FLP34-C 2nd NCCE 6.3.3
 
 Reviewers: svoboda
 
@@ -644,7 +719,8 @@ void f(void) {
 }
 ```
 
-Cite: TS17961 5.36 \[ptrobj\] EXAMPLE, CERT C Rule ARR36-C 1st NCCE 7.3.1
+Cite: TS17961 5.36 \[ptrobj\] EXAMPLE,
+CERT C Rule ARR36-C 1st NCCE 7.3.1
 
 Reviewers: svoboda
 
@@ -683,13 +759,36 @@ Reviewers: svoboda
 
 ### 48\. An expression is shifted by a negative number or by an amount greater than or equal to the width of the promoted expression (6.5.8).
 
-CERT C Rule INT34-C 1st NCCE 5.5.1, 2nd NCCE 5.5.3, 3rd NCCE 5.5.5
+``` c
+void func(unsigned int ui_a, unsigned int ui_b) {
+  unsigned int uresult = ui_a << ui_b;  
+  // Undefined Behavior if !( 0 < ui_b < sizeof(ui_a) / CHAR_BIT)
+}
+```
+
+Cite: CERT C Rule INT34-C 1st NCCE 5.5.1, 2nd NCCE 5.5.3, 3rd NCCE 5.5.5
 
 Reviewers: svoboda
 
 ### 49\. An expression having signed promoted type is left-shifted and either the value of the expression is negative or the result of shifting would not be representable in the promoted type (6.5.8).
 
-CERT C Rule INT32-C 6th NCCE 5.3.8.1, CERT C Rule INT34-C 2nd NCCE 5.5.3
+``` c
+#include <limits.h>
+#include <stddef.h>
+#include <inttypes.h>
+
+void func(signed long si_a, signed long si_b) {
+  signed long result;
+  if (si_a > (LONG_MAX >> si_b)) {
+    /* Handle error */
+  } else {
+    result = si_a << si_b;  // Undefined Behavior
+  }
+}
+```
+
+Cite: CERT C Rule INT32-C 6th NCCE 5.3.8.1,
+CERT C Rule INT34-C 2nd NCCE 5.5.3
 
 Reviewers: svoboda
 
@@ -801,7 +900,37 @@ Reviewers: coates, svoboda
 
 ### 59\. An attempt is made to access, or generate a pointer to just past, a flexible array member of a structure when the referenced object provides no elements for that array (6.7.3.2).
 
-CERT C Rule ARR30-C 5th NCCE 7.1.10
+``` c
+#include <stdlib.h>
+
+struct S {
+  size_t len;
+  char buf[];  /* Flexible array member */
+};
+
+const char *find(const struct S *s, int c) {
+  const char *first = s->buf;
+  const char *last = s->buf + s->len;
+
+  while (first++ != last) {   // Undefined Behavior
+    if (*first == (unsigned char)c) {
+      return first;
+    }
+  }
+  return NULL;
+}
+
+void g(void) {
+  struct S *s = (struct S *)malloc(sizeof(struct S));
+  if (s == NULL) {
+    /* Handle error */
+  }
+  s->len = 0;
+  find(s, 'a');
+}
+```
+
+Cite: CERT C Rule ARR30-C 5th NCCE 7.1.10
 
 Reviewers: svoboda
 
@@ -811,13 +940,44 @@ Note: Removed from J.2. by [N3244](https://www.open-std.org/jtc1/sc22/wg14/www/d
 
 ### 61\. An attempt is made to modify an object defined with a const-qualified type through use of an lvalue with non-const-qualified type (6.7).
 
-CERT C Rule EXP40-C 1st NCCE 4.9.1
+``` c
+const int **ipp;
+int *ip;
+const int i = 42;
+
+void func(void) {
+  ipp = &ip;  // Constraint violation
+  *ipp = &i;  // Valid
+  *ip = 0;    // Undefined Behavior, modifies constant i (was 42)
+}
+```
+
+Cite: CERT C Rule EXP40-C 1st NCCE 4.9.1
 
 Reviewers: svoboda
 
 ### 62\. An attempt is made to refer to an object defined with a volatile-qualified type through use of an lvalue with non-volatile-qualified type (6.7.4).
 
-CERT C Rule EXP32-C 1st NCCE 4.2.1
+``` c
+#include <stdio.h>
+
+void func(void) {
+  static volatile int **ipp;
+  static int *ip;
+  static volatile int i = 0;
+
+  printf("i = %d.\n", i);
+
+  ipp = &ip;          // Undefined Behavior
+  ipp = (int**) &ip;  // Undefined Behavior
+  *ipp = &i;          // Valid
+  if (*ip != 0) {     // Valid
+    /* ... */
+  }
+}
+```
+
+Cite: CERT C Rule EXP32-C 1st NCCE 4.2.1
 
 Reviewers: svoboda, s.maddanimath
 
@@ -864,13 +1024,29 @@ void abcabc(void) {
 }
 ```
 
-Cite: TS17961 5.33 \[restrict\] EXAMPLE 1, 2, CERT C Rule EXP43-C 2st NCCE 4.11.2.1, 3rd NCCE 4.11.2.3, 5th NCCE 4.11.4.1
+Cite: TS17961 5.33 \[restrict\] EXAMPLE 1, 2,
+CERT C Rule EXP43-C 2st NCCE 4.11.2.1, 3rd NCCE 4.11.2.3, 5th NCCE 4.11.4.1
 
 Reviewers: svoboda
 
 ### 66\. A restrict-qualified pointer is assigned a value based on another restricted pointer whose associated block neither began execution before the block associated with this pointer, nor ended before the assignment (6.7.4.2).
 
-CERT C Rule EXP43-C 1st NCCE 4.11.1.1, 4th NCCE 4.11.3.1, 6th NCCE 4.11.5.1
+``` c
+int *restrict a;
+int *restrict b;
+extern int c[];
+
+int main(void) {
+  c[0] = 17;
+  c[1] = 18;
+  a = &c[0];
+  b = &c[1];
+  a = b;      // Undefined Behavior
+  /* ... */
+}
+```
+
+Cite: CERT C Rule EXP43-C 1st NCCE 4.11.1.1, 4th NCCE 4.11.3.1, 6th NCCE 4.11.5.1
 
 Reviewers: svoboda
 
@@ -938,7 +1114,15 @@ Reviewers:
 
 ### 73\. In a context requiring two array types to be compatible, they do not have compatible element types, or their size specifiers evaluate to unequal values (6.7.7.3).
 
-CERT C Rule EXP39-C 4th NCCE 4.8.7
+``` c
+enum { ROWS = 10, COLS = 15 };
+void func(void) {
+  int a[ROWS][COLS];
+  int (*b)[ROWS] = a;  // Undefined Behavior
+}
+```
+
+Cite: CERT C Rule EXP39-C 4th NCCE 4.8.7
 
 Reviewers: s.maddanimath
 
@@ -1098,7 +1282,25 @@ Reviewers: svoboda
 
 ### 86\. The } that terminates a function is reached, and the value of the function call is used by the caller (6.9.2).
 
-CERT C Rule MSC37-C 1st NCCE 15.4.1, 2nd NCCE 15.4.3, 3rd NCCE 15.4.3.1
+``` c
+#include <string.h>
+#include <stdio.h>
+
+int checkpass(const char *password) {
+  if (strcmp(password, "pass") == 0) {
+    return 1;
+  }
+  // Undefined Behavior, no return value
+}
+
+void func(const char *userinput) {
+  if (checkpass(userinput)) {
+    printf("Success\n");
+  }
+}
+```
+
+Cite: CERT C Rule MSC37-C 1st NCCE 15.4.1, 2nd NCCE 15.4.3, 3rd NCCE 15.4.3.1
 
 Reviewers: svoboda
 
@@ -1154,7 +1356,25 @@ Reviewers: svoboda
 
 ### 92\. There are sequences of preprocessing tokens within the list of macro arguments that would otherwise act as preprocessing directives (6.10.5).
 
-CERT C Rule PRE32-C 1st NCCE 2.3.1
+``` c
+#include <string.h>
+
+void func(const char *src) {
+  /* Validate the source string; calculate size */
+  char *dest;
+  /* malloc() destination string */
+  memcpy(dest, src,
+    #ifdef PLATFORM1
+      12  // Undefined Behavior if memcpy() defined as macro
+    #else
+      24
+    #endif
+  );
+  /* ... */
+);
+```
+
+Cite: CERT C Rule PRE32-C 1st NCCE 2.3.1
 
 Reviewers: svoboda
 
@@ -1220,7 +1440,20 @@ Reviewers: svoboda
 
 ### 99\. An attempt is made to copy an object to an overlapping object by use of a library function, other than as explicitly allowed (e.g., memmove) (Clause 7).
 
-CERT C Rule EXP43-C 4th NCCE 4.11.3.1
+``` c
+#include <string.h>
+
+void func(void) {
+  char c_str[]= "test string";
+  char *ptr1 = c_str;
+  char *ptr2;
+
+  ptr2 = ptr1 + 3;
+  memcpy(ptr2, ptr1, 6);  // Undefined Behavior because of overlapping objects
+}
+```
+
+Cite: CERT C Rule EXP43-C 4th NCCE 4.11.3.1
 
 Reviewers: svoboda
 
@@ -1276,7 +1509,21 @@ Reviewers: svoboda
 
 ### 104\. The program attempts to declare a library function itself, rather than via a standard header, but the declaration does not have external linkage (7.1.2).
 
-CERT C Rule DCL37-C 4th NCCE 3.4.7
+``` c
+#include <stddef.h>
+
+void *malloc(size_t nbytes) {  // Undefined Behavior
+  void *ptr;
+  /* Allocate storage from own pool and set ptr */
+  return ptr;
+}
+
+void free(void *ptr) {         // Undefined Behavior
+  /* Return storage to own pool */
+}
+```
+
+Cite: CERT C Rule DCL37-C 4th NCCE 3.4.7
 
 Reviewers: svoboda, s.maddanimath
 
@@ -1334,7 +1581,21 @@ Reviewers: svoboda
 
 ### 109\. The macro definition of assert is suppressed to access an actual function (7.2).
 
-CERT C Rule MSC38-C 1st NCCE 15.5.1
+``` c
+#include <assert.h>
+
+typedef void (*handler_type)(int);
+
+void execute_handler(handler_type handler, int value) {
+  handler(value);
+}
+
+void func(int e) {
+  execute_handler(&(assert), e < 0);  // Undefined Behavior
+}
+```
+
+Cite: CERT C Rule MSC38-C 1st NCCE 15.5.1
 
 Reviewers: svoboda
 
@@ -1388,7 +1649,8 @@ Reviewers: svoboda
 extern int errno;  // Undefined Behavior
 ```
 
-Cite: TS17961 5.44 \[resident\] EXAMPLE 1, CERT C Rule MSC38-C 2nd NCCE 15.5.3
+Cite: TS17961 5.44 \[resident\] EXAMPLE 1,
+CERT C Rule MSC38-C 2nd NCCE 15.5.3
 
 Reviewers: svoboda
 
@@ -1567,13 +1829,51 @@ Reviewers: svoboda
 
 ### 129\. A signal handler returns when the signal corresponded to a computational exception (7.14.1.1).
 
-CERT C Rule: SIG35-C,1st NCCE
+``` c
+#include <errno.h>
+#include <limits.h>
+#include <signal.h>
+#include <stdlib.h>
+
+volatile sig_atomic_t denom;
+
+void sighandle(int s) {
+  /* Fix the offending volatile */
+  if (denom == 0) {
+    denom = 1;
+  }
+}
+
+int main(int argc, char *argv[]) {
+  if (argc < 2) {
+    return 0;
+  }
+
+  char *end = NULL;
+  long temp = strtol(argv[1], &end, 10);
+
+  if (end == argv[1] || 0 != *end ||
+     ((LONG_MIN == temp || LONG_MAX == temp) && errno == ERANGE)) {
+    /* Handle error */
+  }
+
+  denom = (sig_atomic_t)temp;
+  signal(SIGFPE, sighandle);
+
+  long result = 100 / (long)denom;  // Undefined Behavior
+  return 0;
+}
+```
+
+Cite: CERT C Rule: SIG35-C, 1st NCCE
 
 Reviewers: svoboda
 
 ### 130\. A signal handler called in response to SIGFPE, SIGILL, SIGSEGV, or any other implementation-defined value corresponding to a computational exception returns (7.14.1.1).
 
-CERT C Rule SIG35-C 1st NCCE 12.4.1
+See the example for Undefined Behavior #129.
+
+Cite: CERT C Rule SIG35-C 1st NCCE 12.4.1
 
 Reviewers: svoboda
 
@@ -1611,7 +1911,8 @@ int main(void) {
 }
 ```
 
-Cite: TS17961 5.5 \[asyncsig\] EXAMPLE 2, CERT C Rule SIG30-C 3rd NCCE 12.1.5
+Cite: TS17961 5.5 \[asyncsig\] EXAMPLE 2,
+CERT C Rule SIG30-C 3rd NCCE 12.1.5
 
 Reviewers: svoboda
 
@@ -1650,19 +1951,133 @@ Reviewers: svoboda
 
 ### 133\. The value of errno is referred to after a signal occurred other than as the result of calling the abort or raise function and the corresponding signal handler obtained a SIG\_ERR return from a call to the signal function (7.14.1.1).
 
-CERT C Rule ERR32-C 1st NCCE 13.2.1
+``` c
+#include <signal.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+typedef void (*pfv)(int);
+
+void handler(int signum) {
+  pfv old_handler = signal(signum, SIG_DFL);
+  if (old_handler == SIG_ERR) {
+    perror("SIGINT handler"); // Undefined Behavior
+    /* Handle error */
+  }
+}
+int main(void) {
+  pfv old_handler = signal(SIGINT, handler);
+  if (old_handler == SIG_ERR) {
+    perror("SIGINT handler");
+    /* Handle error */
+  }
+
+  /* Main code loop */
+
+  return EXIT_SUCCESS;
+}
+```
+
+Cite: CERT C Rule ERR32-C 1st NCCE 13.2.1
 
 Reviewers: svoboda
 
 ### 134\. A signal is generated by an asynchronous signal handler (7.14.1.1).
 
-CERT C Rule SIG30-C 2nd NCCE 12.1.3
+``` c
+#include <setjmp.h>
+#include <signal.h>
+#include <stdlib.h>
+
+enum { MAXLINE = 1024 };
+static jmp_buf env;
+
+void handler(int signum) {
+  longjmp(env, 1);
+}
+
+void log_message(char *info1, char *info2) {
+  static char *buf = NULL;
+  static size_t bufsize;
+  char buf0[MAXLINE];
+
+  if (buf == NULL) {
+    buf = buf0;
+    bufsize = sizeof(buf0);
+  }
+
+  /*
+  * Try to fit a message into buf, else reallocate
+  * it on the heap and then log the message.
+  */
+
+  /* Undefined Behavior if SIGINT is raised here */
+
+  if (buf == buf0) {
+    buf = NULL;
+  }
+}
+
+int main(void) {
+  if (signal(SIGINT, handler) == SIG_ERR) {
+    /* Handle error */
+  }
+  char *info1;
+  char *info2;
+
+  /* info1 and info2 are set by user input here */
+
+  if (setjmp(env) == 0) {
+    while (1) {
+      /* Main loop program code */
+      log_message(info1, info2);
+      /* More program code */
+    }
+  } else {
+    log_message(info1, info2);
+  }
+  return 0;
+}
+```
+
+Cite: CERT C Rule SIG30-C 2nd NCCE 12.1.3
 
 Reviewers: svoboda
 
 ### 135\. The signal function is used in a multi-threaded program (7.14.1.1).
 
-CERT C Rule CON37-C 1st NCCE 14.8.1
+``` c
+#include <signal.h>
+#include <stddef.h>
+#include <threads.h>
+
+volatile sig_atomic_t flag = 0;
+
+void handler(int signum) {
+  flag = 1;
+}
+
+/* Runs until user sends SIGUSR1 */
+int func(void *data) {
+  while (!flag) {
+    /* ... */
+  }
+  return 0;
+}
+
+int main(void) {
+  signal(SIGUSR1, handler);  /* Undefined Behavior */
+  thrd_t tid;
+
+  if (thrd_success != thrd_create(&tid, func, NULL)) {
+    /* Handle error */
+  }
+  /* ... */
+  return 0;
+}
+```
+
+Cite: CERT C Rule CON37-C 1st NCCE 14.8.1
 
 Reviewers: svoboda
 
@@ -1744,7 +2159,8 @@ Reviewers: svoboda, j.myers
 
 ### 140\. The va\_arg macro is invoked when there is no actual next argument, or with a specified type that is not compatible with the promoted type of the actual next argument, with certain exceptions (7.16.1.1).
 
-CERT C Rec DCL10-C 1st NCCE, CERT C Rule MSC39-C 1st NCCE 15.6.1
+CERT C Rec DCL10-C 1st NCCE, 
+CERT C Rule MSC39-C 1st NCCE 15.6.1
 
 Reviewers: svoboda
 
@@ -1778,7 +2194,39 @@ Reviewers: svoboda, UBSG
 
 ### 142\. Using a null pointer constant in form of an integer expression as an argument to a ... function and then interpreting it as a void\* or char\* (7.16.1.1).
 
-CERT C Rec DCL10-C 1st NCCE, CERT C Rule MSC39-C 1st NCCE 15.6.1
+``` c
+#include <stdarg.h>
+#include <stdio.h>
+
+int contains_zero(size_t count, va_list ap) {
+  for (size_t i = 1; i < count; ++i) {
+    if (va_arg(ap, double) == 0.0) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
+int print_reciprocals(size_t count, ...) {
+  va_list ap;
+  va_start(ap, count);
+
+  if (contains_zero(count, ap)) {  // Undefined Behavior
+    va_end(ap);
+    return 1;
+  }
+
+  for (size_t i = 0; i < count; ++i) {
+    printf("%f ", 1.0 / va_arg(ap, double));
+  }
+
+  va_end(ap);
+  return 0;
+}
+```
+
+Cite: CERT C Rec DCL10-C 1st NCCE,
+CERT C Rule MSC39-C 1st NCCE 15.6.1
 
 Reviewers: svoboda
 
@@ -1799,7 +2247,8 @@ Reviewers: svoboda, j.myers
 
 ### 144\. The va\_start macro is invoked with additional arguments that include unbalanced parentheses, or unrecognized preprocessing tokens (7.16.1.4).
 
-CERT C Rec DCL10-C 1st NCCE, CERT C Rule MSC39-C 1st NCCE 15.6.1
+CERT C Rec DCL10-C 1st NCCE,
+CERT C Rule MSC39-C 1st NCCE 15.6.1
 
 Reviewers: svoboda
 
@@ -1933,7 +2382,20 @@ Note: Removed from J.2. by [N3064](https://www.open-std.org/jtc1/sc22/wg14/www/d
 
 ### 153\. The value of a pointer to a FILE object is used after the associated file is closed (7.23.3).
 
-CERT C Rule FIO46-C 1st NCCE 10.12.1
+``` c
+#include <stdio.h>
+
+int close_stdout(void) {
+  if (fclose(stdout) == EOF) {
+    return -1;
+  }
+
+  printf("stdout successfully closed.\n");  // Undefined Behavior
+  return 0;
+}
+```
+
+Cite: CERT C Rule FIO46-C 1st NCCE 10.12.1
 
 Reviewers: svoboda
 
@@ -2419,19 +2881,112 @@ Reviewers: svoboda, j.myers
 
 ### 186\. The values of any bytes in a new object allocated by the realloc function beyond the size of the old object are used (7.24.3.7).
 
-CERT C Rule EXP33-C 5th NCCE 4.3.11
+``` c
+#include <stdlib.h>
+#include <stdio.h>
+
+enum { OLD_SIZE = 10, NEW_SIZE = 20 };
+
+int *resize_array(int *array, size_t count) {
+  if (0 == count) {
+    return 0;
+  }
+
+  int *ret = (int *)realloc(array, count * sizeof(int));
+  if (!ret) {
+    free(array);
+    return 0;
+  }
+
+  return ret;
+}
+
+void func(void) {
+  int *array = (int *)malloc(OLD_SIZE * sizeof(int));
+  if (0 == array) {
+    /* Handle error */
+  }
+
+  for (size_t i = 0; i < OLD_SIZE; ++i) {
+    array[i] = i;
+  }
+
+  array = resize_array(array, NEW_SIZE);
+  if (0 == array) {
+    /* Handle error */
+  }
+
+  for (size_t i = 0; i < NEW_SIZE; ++i) {
+    printf("%d ", array[i]);  // Undefined Behavior on new array members
+  }
+}
+```
+
+Cite: CERT C Rule EXP33-C 5th NCCE 4.3.11
 
 Reviewers: svoboda, s.maddanimath
 
 ### 187\. The program calls the exit or quick\_exit function more than once, or calls both functions (7.24.4.4, 7.24.4.7).
 
-CERT C Rule ENV32-C 1st NCCE 11.3.1
+``` c
+#include <stdlib.h>
+
+void exit1(void) {
+  /* ... Cleanup code ... */
+  return;
+}
+
+void exit2(void) {
+  extern int some_condition;
+  if (some_condition) {
+    /* ... More cleanup code ... */
+    exit(0);  // Undefined Behavior when invoked within exit()
+  }
+  return;
+}
+
+int main(void) {
+  if (atexit(exit1) != 0) {
+    /* Handle error */
+  }
+  if (atexit(exit2) != 0) {
+    /* Handle error */
+  }
+  /* ... Program code ... */
+  return 0;
+}
+```
+
+Cite: CERT C Rule ENV32-C 1st NCCE 11.3.1
 
 Reviewers: svoboda
 
 ### 188\. During the call to a function registered with the atexit or at\_quick\_exit function, a call is made to the longjmp function that would terminate the call to the registered function (7.24.4.4, 7.24.4.7).
 
-CERT C Rule ENV32-C 2nd NCCE 11.3.3
+``` c
+#include <stdlib.h>
+#include <setjmp.h>
+
+jmp_buf env;
+int val;
+
+void exit1(void) {
+  longjmp(env, 1);  // Undefined Behavior
+}
+
+int main(void) {
+  if (atexit(exit1) != 0) {
+    /* Handle error */
+  }
+  if (setjmp(env) == 0) {
+    exit(0);
+  } else {
+    return 0;
+  }
+}
+```
+
+Cite: CERT C Rule ENV32-C 2nd NCCE 11.3.3
 
 Reviewers: svoboda
 
@@ -2558,7 +3113,19 @@ Reviewers: svoboda, j.myers
 
 ### 196\. A string or wide string utility function is instructed to access an array beyond the end of an object (7.26.1, 7.31.4).
 
-CERT C Rule STR38-C 1st NCCE 8.6.1, 2nd NCCE 8.6.2, 3rd NCCE 8.6.4
+``` c
+#include <stddef.h>
+#include <string.h>
+
+void func(void) {
+  wchar_t wide_str1[] = L"0123456789";
+  wchar_t wide_str2[] = L"0000000000";
+
+  strncpy(wide_str2, wide_str1, 10);  // Undefined Behavior
+}
+```
+
+Cite: CERT C Rule STR38-C 1st NCCE 8.6.1, 2nd NCCE 8.6.2, 3rd NCCE 8.6.4
 
 Reviewers: svoboda
 
@@ -2767,7 +3334,33 @@ Reviewers: svoboda, j.myers
 
 ### 211\. The thread passed to thrd\_detach or thrd\_join was previously detached or joined with another thread (7.28.5.3, 7.28.5.6).
 
-CERT C Rule CON39-C 1st NCCE 14.10.1
+``` c
+#include <stddef.h>
+#include <threads.h>
+
+int thread_func(void *arg) {
+  /* Do work */
+  thrd_detach(thrd_current());
+  return 0;
+}
+
+int main(void) {
+  thrd_t t;
+
+  if (thrd_success != thrd_create(&t, thread_func, NULL)) {
+    /* Handle error */
+    return 0;
+  }
+
+  if (thrd_success != thrd_join(t, 0)) {  // Undefined Behavior
+    /* Handle error */
+    return 0;
+  }
+  return 0;
+}
+```
+
+Cite: CERT C Rule CON39-C 1st NCCE 14.10.1
 
 Reviewers: svoboda
 
@@ -2882,7 +3475,16 @@ Reviewers: svoboda, j.myers
 
 ### 215\. At least one member of the broken-down time passed to asctime contains a value outside its normal range, or the calculated year exceeds four digits or is less than the year 1000 (7.29.3.1).
 
-CERT C Rule MSC33-C 1st NCCE 15.3.1
+``` c
+#include <time.h>
+
+void func(struct tm *time_tm) {
+  char *time = asctime(time_tm);  // Undefined Behavior
+  /* ... */
+}
+```
+
+Cite: CERT C Rule MSC33-C 1st NCCE 15.3.1
 
 Reviewers: svoboda
 
@@ -2921,7 +3523,18 @@ Reviewers: svoboda, j.myers
 
 ### 218\. An mbstate\_t object is used inappropriately (7.31.6).
 
-CERT C Rule EXP33-C 3rd NCCE 4.3.7
+``` c
+#include <string.h>
+#include <wchar.h>
+
+void func(const char *mbs) {
+  size_t len;
+  mbstate_t state;
+  len = mbrlen(mbs, strlen(mbs), &state);  // Undefined Behavior
+}
+```
+
+Cite: CERT C Rule EXP33-C 3rd NCCE 4.3.7
 
 Reviewers: svoboda, s.maddanimath
 
