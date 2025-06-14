@@ -37,7 +37,7 @@ void func(void) {
 
 Cite: CERT C Rule PRE30-C 1st NCCE 2.1.1
 
-Reviewers: svoboda, s.maddanimath
+Reviewers: svoboda
 
 ### 4\. A program in a hosted environment does not define a function named main using one of the specified forms (5.1.2.3.2).
 
@@ -118,7 +118,7 @@ int i5;              // Undefined Behavior, linkage disagreement with previous
 
 Cite: CERT C Rule DCL36-C 1st NCCE 3.3.1
 
-Reviewers: svoboda, s.maddanimath
+Reviewers: svoboda
 
 Note: the following is a different example which is more complex:
 
@@ -153,7 +153,7 @@ void rodent(void) {
 Cite: CERT C Rule DCL30-C 1st NCCE 3.1.1, 2nd NCCE 3.1.4, 3rd NCCE 3.1.6
 Cite: CERT C Rule EXP35-C 1st NCCE 4.5.1, 2nd NCCE 4.5.3
 
-Reviewers: svoboda, s.maddanimath
+Reviewers: svoboda
 
 ### 10\. The value of a pointer to an object whose lifetime has ended is used (6.2.4).
 
@@ -179,7 +179,7 @@ int main(void) {
 
 Cite: TS17961 5.14 \[nullref\] EXAMPLE 5.15 \[addrescape\] EXAMPLE 1, 2, 3
 
-Reviewers: svoboda,s.maddanimath
+Reviewers: svoboda
 
 ### 11\. The value of an object with automatic storage duration is used while the object has an indeterminate representation (6.2.4, 6.7.11, 6.8).
 
@@ -206,7 +206,7 @@ Cite: TS17961 5.35 \[uninitref\] EXAMPLE 1, 2,
 CERT C Rule EXP33-C 4th NCCE 4.3.9,
 CERT C Rec MSC22-C 3rd NCCE
 
-Reviewers: svoboda, s.maddanimath
+Reviewers: svoboda
 
 ### 12\. A non-value representation is read by an lvalue expression that does not have character type (6.2.6.1).
 
@@ -225,7 +225,7 @@ void f(size_t n) {
 
 Cite: TS17961 5.35 \[uninitref\] EXAMPLE 3, 4
 
-Reviewers: svoboda,s.maddanimath
+Reviewers: svoboda
 
 ### 13\. A non-value representation is produced by a side effect that modifies any part of the object using an lvalue expression that does not have character type (6.2.6.1).
 
@@ -302,6 +302,8 @@ Cite: CERT C Rule FLP34-C 2nd NCCE 6.3.3
 Reviewers: svoboda
 
 ### 18\. An lvalue does not designate an object when evaluated (6.3.2.1).
+
+TODO
 
 Reviewers:
 
@@ -402,7 +404,7 @@ void f(void) {
 
 Cite: TS17961 5.6 \[argcomp\] EXAMPLE 1
 
-Reviewers: svoboda, s.maddanimath
+Reviewers: svoboda
 
 ### 26\. An unmatched ' or " character is encountered on a logical source line during tokenization (6.4).
 
@@ -516,7 +518,7 @@ void func(void) {
 
 Cite: CERT C Rec PRE00-C 1st NCCE, 3rd NCCE
 
-Reviewers: svoboda, s.maddanimath
+Reviewers: svoboda
 
 ### 35\. An exceptional condition occurs during the evaluation of an expression (6.5.).
 
@@ -573,7 +575,7 @@ void g(const char *s) {
 
 Cite: TS17961 5.6 \[argcomp\] EXAMPLE 2
 
-Reviewers: svoboda, s.maddanimath
+Reviewers: svoboda
 
 ### C18-38. For a call to a function without a function prototype in scope where the function is defined with a function prototype, either the prototype ends with an ellipsis or the types of the arguments after default argument promotion are not compatible with the types of the parameters (6.5.2.2).
 
@@ -595,7 +597,7 @@ void h(void) {
 
 Cite: TS17961 5.6 \[argcomp\] EXAMPLE 3
 
-Reviewers: svoboda, s.maddanimath
+Reviewers: svoboda
 
 ### 37\. A function is defined with a type that is not compatible with the type (of the expression) pointed to by the expression that denotes the called function (6.5.3.3).
 
@@ -613,7 +615,7 @@ int g(int x) {
 
 Cite: TS17961 5.6 \[argcomp\] EXAMPLE 4, 5.13 \[funcdecl\] EXAMPLE 3
 
-Reviewers: svoboda, s.maddanimath
+Reviewers: svoboda
 
 ### 38\. A member of an atomic structure or union is accessed (6.5.3.4).
 
@@ -658,7 +660,7 @@ int divide(int x) {
 
 Cite: TS17961 5.26 \[diverr\] EXAMPLE 1
 
-Reviewers: svoboda, s.maddanimath
+Reviewers: svoboda
 
 ### 42\. If the quotient a/b is not representable, the behavior of both a/b and a%b (6.5.6).
 
@@ -672,7 +674,7 @@ int remainder(int x) {
 
 Cite: TS17961 5.26 \[diverr\] EXAMPLE 2
 
-Reviewers: svoboda, s.maddanimath
+Reviewers: svoboda
 
 ### 43\. Addition or subtraction of a pointer into, or just beyond, an array object and an integer type produces a result that does not point into, or just beyond, the same array object (6.5.7).
 
@@ -995,7 +997,7 @@ void func(void) {
 
 Cite: CERT C Rule EXP32-C 1st NCCE 4.2.1
 
-Reviewers: svoboda, s.maddanimath
+Reviewers: svoboda
 
 ### 63\. The specification of a function type includes any type qualifiers (6.7.4).
 
@@ -1140,7 +1142,7 @@ void func(void) {
 
 Cite: CERT C Rule EXP39-C 4th NCCE 4.8.7
 
-Reviewers: s.maddanimath
+Reviewers: svoboda
 
 ### 74\. A declaration of an array parameter includes the keyword static within the \[ and \] and the corresponding argument does not provide access to the first element of an array with at least the specified number of elements (6.7.7.4).
 
@@ -1545,7 +1547,7 @@ void free(void *ptr) {         // Undefined Behavior
 
 Cite: CERT C Rule DCL37-C 4th NCCE 3.4.7
 
-Reviewers: svoboda, s.maddanimath
+Reviewers: svoboda
 
 ### 105\. The program declares or defines a reserved identifier, other than as allowed by 7.1.4 (7.1.3).
 
@@ -3064,7 +3066,7 @@ void func(void) {
 
 Cite: CERT C Rule EXP33-C 5th NCCE 4.3.11
 
-Reviewers: svoboda, s.maddanimath
+Reviewers: svoboda
 
 ### 187\. The program calls the exit or quick\_exit function more than once, or calls both functions (7.24.4.4, 7.24.4.7).
 
@@ -3676,7 +3678,7 @@ void func(const char *mbs) {
 
 Cite: CERT C Rule EXP33-C 3rd NCCE 4.3.7
 
-Reviewers: svoboda, s.maddanimath
+Reviewers: svoboda
 
 ### 219\. The value of an argument of type wint\_t to a wide character classification or case mapping function is neither equal to the value of WEOF nor representable as a wchar\_t (7.32.1).
 
