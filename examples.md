@@ -1,4 +1,4 @@
-# Examples of Undefined Behavior for Annex J.2.
+# Examples of Undefined Behavior for Annex J.2 in C23
 
 For details about how to complete development of this document, see the [README](./README.md).
 
@@ -311,13 +311,11 @@ Reviewers:
 ``` c
 struct f *p;
 void g(void) {
-  *p;
+  *p;   // Undefined Behavior
 }
 ```
 
 Reviewers: uecker, j.myers
-
-Note: Removed from J.2. by [N3244](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3244.pdf)
 
 ### 20\. An lvalue designating an object of automatic storage duration that could have been declared with the register storage class is used in a context that requires the value of the designated object, but the object is uninitialized. (6.3.2.1).
 
@@ -342,8 +340,6 @@ void f(void) {
 ```
 
 Reviewers: svoboda
-
-Note: Removed from J.2. by [N3244](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3244.pdf)
 
 ### 22\. An attempt is made to use the value of a void expression, or an implicit or explicit conversion (except to void) is applied to a void expression (6.3.2.2).
 
@@ -411,7 +407,7 @@ EXTENDED COMPILABLE EXAMPLE: Consider a platform that allows string literals to 
 
 ``` c
 char s[] = "foo
-bar"; // Undefined Behavior
+bar";   // Undefined Behavior
 ```
 
 Reviewers: svoboda
@@ -431,7 +427,7 @@ Reviewers: svoboda
 EXTENDED COMPILABLE EXAMPLE: Consider a platform that allows the division sign `÷` to be used as identifiers:
 
 ``` c
-double ONE\u00F7TWO = 0.5;  // ONE ÷ TWO
+double ONE\u00F7TWO = 0.5;  // ONE ÷ TWO, Undefined Behavior
 ```
 
 Reviewers: svoboda
@@ -551,57 +547,6 @@ void f(void) {
 Cite: TS17961 5.1 \[ptrcomp\] EXAMPLE
 
 Reviewers: svoboda
-
-### C18-37. For a call to a function without a function prototype in scope, the number of arguments does not equal the number of parameters (6.5.2.2).
-
-``` c
-// In another source file:
-void copy(char *dst, const char *src) {
-  if (!strcpy(dst, src)) {
-    // Handle Error
-  }
-}
-
-
-// In this source file -- no copy prototype in scope:
-void copy();
-
-void g(const char *s) {
-  char buf[20];
-  copy(buf, s, sizeof buf);  // Undefined Behavior
-  // ...
-}
-```
-
-Cite: TS17961 5.6 \[argcomp\] EXAMPLE 2
-
-Note: Removed from C23
-
-Reviewers: svoboda
-
-### C18-38. For a call to a function without a function prototype in scope where the function is defined with a function prototype, either the prototype ends with an ellipsis or the types of the arguments after default argument promotion are not compatible with the types of the parameters (6.5.2.2).
-
-``` c
-// In another source file:
-void buginf(const char *fmt, ...) {
-  // ...
-}
-
-
-// In this source file -- no buginf prototype in scope:
-void buginf();
-
-void h(void) {
-  buginf("bug in function %s, line %d\n", __func__, __LINE__);  // Undefined Behavior
-  // ...
-}
-```
-
-Cite: TS17961 5.6 \[argcomp\] EXAMPLE 3
-
-Reviewers: svoboda
-
-Note: Removed from C23
 
 ### 37\. A function is defined with a type that is not compatible with the type (of the expression) pointed to by the expression that denotes the called function (6.5.3.3).
 
@@ -847,14 +792,14 @@ EXTENDED COMPILABLE EXAMPLE: Consider a platform that accepts floating-point con
 
 ``` c
 enum people {
-  Tom=1.0,  // Undefined Behavior
+  Tom=1.0,           // Undefined Behavior
   Dick=2,
   Harry=3
 };
 
 struct s {
   int bit:1;
-  int two_bits:2.5; // Undefined Behavior
+  int two_bits:2.5;  // Undefined Behavior
   int all_the_bits;
 };
 ```
@@ -871,7 +816,7 @@ int square(int x) {return x*x;}
 enum people {
   Tom=1,
   Dick=2,
-  Harry=square(2)   // Undefined Behavior
+  Harry=square(2)           // Undefined Behavior
 };
 
 struct s {
@@ -1271,17 +1216,6 @@ printf("x is %d!\n", x);
 
 Reviewers: svoboda
 
-### C18-87. An adjusted parameter type in a function definition is not a complete object type (6.9.1).
-
-``` c
-// No previous definition of struct foo
-void f(struct foo x) {}   // Undefined Behavior
-```
-
-Note: Removed from C23
-
-Reviewers: j.myers
-
 ### 85\. A function that accepts a variable number of arguments is defined without a parameter type list that ends with the ellipsis notation (6.9.2).
 
 ``` c
@@ -1418,8 +1352,7 @@ Reviewers: svoboda
 
 ``` c
 #define my_join(a, b) a ## b
-char q[] = my_join(!, !);
-// Ill-formed
+char q[] = my_join(!, !);   // Ill-formed
 ```
 
 HYPOTHETICAL COMPILABLE EXAMPLE?
@@ -1980,7 +1913,7 @@ Reviewers: svoboda
 
 ### 130\. A signal handler called in response to SIGFPE, SIGILL, SIGSEGV, or any other implementation-defined value corresponding to a computational exception returns (7.14.1.1).
 
-See the example for Undefined Behavior #129.
+See UB Example #129.
 
 Cite: CERT C Rule SIG35-C 1st NCCE 12.4.1
 
@@ -2313,8 +2246,8 @@ void my_printf(const char* prefix, ...) {
   int *x;
   int *y;
   va_start( args, prefix);
-  x = va_arg( args, int*);   // Valid
-  y = va_arg( args, void()); // Undefined Behavior
+  x = va_arg( args, int*);      // Valid
+  y = va_arg( args, void());    // Undefined Behavior
   va_end( args);
   printf("%s: [%d, %d], [%d, %d]\n", prefix, x[0], x[1], y[0], y[1]);
 }
@@ -2393,26 +2326,6 @@ void f(int last, ...) {
 
 Reviewers: svoboda
 
-### C18-145. The parameter parmN of a va\_start macro is declared with the register storage class, with a function or array type, or with a type that is not compatible with the type that results after application of the default argument promotions (7.16.1.4).
-
-``` c
-#include <stdio.h>
-#include <stdarg.h>
-
-void f(float last, ...) {
-  register int wrong = 0;
-  va_list args;
-  va_start( args, wrong);  // Undefined Behavior
-  int number = va_arg(args, int);  // Undefined Behavior, no arg!
-  printf("The next variadic number is %d\n", number);
-  va_end(args);
-}
-```
-
-Reviewers: svoboda
-
-Note: Removed from C23
-
 ### 145\. The macro definition of a generic function is suppressed to access an actual function (7.17.1, 7.18).
 
 ``` c
@@ -2439,7 +2352,7 @@ typedef struct st {
   int num2;
 } binary_s;
 
-size_t z = offsetof( int (*)(int, int), num2);
+size_t z = offsetof( int (*)(int, int), num2);  // Undefined Behavior
 ```
 
 HYPOTHETICAL COMPILABLE EXAMPLE?
@@ -2482,7 +2395,7 @@ typedef struct st {
   int num2;
 } binary_s;
 
-size_t z = offsetof( binary_s, num3); // Undefined Behavior, should be num2
+size_t z = offsetof( binary_s, num3);   // Undefined Behavior, should be num2
 ```
 
 Reviewers: svoboda
@@ -3184,7 +3097,7 @@ Reviewers: svoboda
 ### 191\. A command is executed through the system function in a way that is documented as causing termination or some other form of undefined behavior (7.24.4.8).
 
 ``` c
-int retval = system("ls /missing"); // ?Undefined Behavior
+int retval = system("ls /missing");   // Undefined Behavior
 ```
 
 HYPOTHETICAL COMPILABLE EXAMPLE?

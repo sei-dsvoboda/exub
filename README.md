@@ -45,6 +45,12 @@ All TODOs have been partitioned into:
 EXTENDED COMPILABLE EXAMPLE: 6, 26, 27, 28, 29, 52, 53, 54, 82, 90, 149
 HYPOTHETICAL CODE EXAMPLE: 93, 94, 141, 145, 191
 
+### June 2025 commit & notes
+
+Added remaining examples from CERT rules, recs, and TS 17961.
+
+New examples.c18.md for UBs from C18 that no longer exist in C23.
+
 ## Development Rules
 
 Here are some rules that the examples should comply with:
