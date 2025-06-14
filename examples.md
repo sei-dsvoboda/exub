@@ -12,7 +12,13 @@ Reviewers: svoboda, UBSG
 
 ### 2\. A nonempty source file does not end in a new-line character which is not immediately preceded by a backslash character or ends in a partial preprocessing token or comment (5.1.1.2).
 
-CERT C Rec MSC04-C 1st NCCE
+``` c
+// Undefined Behavior
+/* Comment with end comment marker unintentionally omitted
+security_critical_function();
+```
+
+Cite: CERT C Rec MSC04-C 1st NCCE
 
 Reviewers: svoboda
 
@@ -498,7 +504,17 @@ Reviewers: svoboda, j.myers
 
 ### 34\. A side effect on a scalar object is unsequenced relative to either a different side effect on the same scalar object or a value computation using the value of the same scalar object (6.5).
 
-CERT C Rec PRE00-C 1st NCCE, 3rd NCCE
+``` c
+#define CUBE(X) ((X) * (X) * (X))
+ 
+void func(void) {
+  int i = 2;
+  int a = 81 / CUBE(++i);  // Undefined Behavior
+  /* ... */
+}
+```
+
+Cite: CERT C Rec PRE00-C 1st NCCE, 3rd NCCE
 
 Reviewers: svoboda, s.maddanimath
 
@@ -1459,7 +1475,11 @@ Reviewers: svoboda
 
 ### 100\. A file with the same name as one of the standard headers, not provided as part of the implementation, is placed in any of the standard places that are searched for included source files (7.1.2).
 
-CERT C Rec PRE04-C 1st NCCE
+``` c
+#include "stdio.h"  // Undefined Behavior, distinct from <stdio.h> */
+```
+
+Cite: CERT C Rec PRE04-C 1st NCCE
 
 Reviewers: svoboda
 
@@ -1800,19 +1820,97 @@ Reviewers: svoboda, j.myers
 
 ### 125\. An invocation of the setjmp macro occurs other than in an allowed context (7.13.2.1).
 
-CERT C Rec MSC22-C 1st NCCE
+``` c
+jmp_buf buf;
+
+void f(void) {
+  int i = setjmp(buf);  // Undefined Behavior
+  if (i == 0) {
+    g();
+  } else {
+    /* longjmp was invoked */
+  }
+}
+
+void g(void) {
+  /* ... */
+  longjmp(buf, 1);
+}
+```
+
+Cite: CERT C Rec MSC22-C 1st NCCE
 
 Reviewers: svoboda
 
 ### 126\. The longjmp function is invoked to restore a nonexistent environment (7.13.2.1).
 
-CERT C Rec MSC22-C,2nd NCCE
+``` c
+#include <setjmp.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+static jmp_buf buf;
+static void bad(void);
+
+static void g(void) {
+  if (setjmp(buf) == 0) {
+    printf("setjmp() invoked\n");
+  } else {
+    printf("longjmp() invoked\n");
+  }
+}
+
+static void f(void) {
+  g();
+}
+
+static void setup(void) {
+  f();
+}
+
+void do_stuff(void) {
+  void (*b)(void) = bad;
+  /* ... */
+  longjmp(buf, 1);   // Undefined Behavior
+}
+
+static void bad(void) {
+  printf("Should not be called!\n");
+  exit(1);
+}
+
+int main(void) {
+  setup();
+  do_stuff();
+}
+```
+
+Cite: CERT C Rec MSC22-C,2nd NCCE
 
 Reviewers: svoboda
 
 ### 127\. After a longjmp, there is an attempt to access the value of an object of automatic storage duration that does not have volatile-qualified type, local to the function containing the invocation of the corresponding setjmp macro, that was changed between the setjmp invocation and longjmp call (7.13.2.1).
 
-CERT C Rec MSC22-C 3rd NCCE
+``` c
+jmp_buf buf;
+
+void f(void) {
+  int i = 0;
+  if (setjmp(buf) != 0) {
+    printf("%i\n", i);      // Undefined Behavior
+    /* ... */
+  }
+  i = 2;
+  g();
+}
+
+void g(void) {
+  /* ... */
+  longjmp(buf, 1);
+}
+```
+
+Cite: CERT C Rec MSC22-C 3rd NCCE
 
 Reviewers: svoboda
 
@@ -2159,7 +2257,32 @@ Reviewers: svoboda, j.myers
 
 ### 140\. The va\_arg macro is invoked when there is no actual next argument, or with a specified type that is not compatible with the promoted type of the actual next argument, with certain exceptions (7.16.1.1).
 
-CERT C Rec DCL10-C 1st NCCE, 
+``` c
+enum { va_eol = -1 };
+
+unsigned int average(int first, ...) {
+  unsigned int count = 0;
+  unsigned int sum = 0;
+  int i = first;
+  va_list args;
+
+  va_start(args, first);
+
+  while (i != va_eol) {
+    sum += i;
+    count++;
+    i = va_arg(args, int);
+  }
+
+  va_end(args);
+  return(count ? (sum / count) : 0);
+}
+
+
+int avg = average(1, 4, 6, 4, 1); // Undefined Behavior
+```
+
+Cite: CERT C Rec DCL10-C 1st NCCE, 
 CERT C Rule MSC39-C 1st NCCE 15.6.1
 
 Reviewers: svoboda
@@ -2247,8 +2370,17 @@ Reviewers: svoboda, j.myers
 
 ### 144\. The va\_start macro is invoked with additional arguments that include unbalanced parentheses, or unrecognized preprocessing tokens (7.16.1.4).
 
-CERT C Rec DCL10-C 1st NCCE,
-CERT C Rule MSC39-C 1st NCCE 15.6.1
+``` c
+#include <stdarg.h>
+
+#define CUBE(X) ((X) * (X) * (X))
+
+void f(int last, ...) {
+  va_list args;
+  va_start( args, CUBE(last));   // Undefined Behavior
+  va_end(args);
+}
+```
 
 Reviewers: svoboda
 
@@ -2629,7 +2761,15 @@ Reviewers: svoboda
 
 ### 170\. The result of a conversion by one of the formatted input functions cannot be represented in the corresponding object, or the receiving object does not have an appropriate type (7.23.6.2, 7.31.2.2).
 
-CERT C Rec INT05-C 1st NCCE
+``` c
+long num_long;
+
+if (scanf("%ld", &num_long) != 1) { // Undefined Behavior
+  /* Handle error */
+}
+```
+
+Cite: CERT C Rec INT05-C 1st NCCE
 
 Reviewers: svoboda
 
