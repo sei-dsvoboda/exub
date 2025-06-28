@@ -70,6 +70,8 @@ declarations, and both had external linkage.
 Removed redundant casts of the result of malloc and realloc.
 Fixed another instance of misuse of _ in place of *.
 
+Stop using 0 as a null pointer constant, for clarity.
+
 ## Development Rules
 
 Here are some rules that the examples should comply with:

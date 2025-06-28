@@ -754,7 +754,7 @@ Reviewers: svoboda
 
 size_t size = 1 + (SIZE_MAX / 2);     // Assumes sizeof(size_t) == sizeof(ptrdiff_t)
 char *x = malloc(size);
-assert(x != 0);
+assert(x != NULL);
 char *start = x;
 char *too_far = x + size;
 ptrdiff_t too_big = too_far - start;  // Undefined Behavior
@@ -3068,7 +3068,7 @@ Reviewers: svoboda
 #include <stdlib.h>
 
 unsigned char *p = malloc(10);
-if (p != 0) {
+if (p != NULL) {
   printf("p[0] is %c\n", p[0]);  // Undefined Behavior
 }
 ```
@@ -3101,7 +3101,7 @@ int *resize_array(int *array, size_t count)
 void func(void)
 {
   int *array = malloc(OLD_SIZE * sizeof(int));
-  if (0 == array) {
+  if (NULL == array) {
     // Handle Error
   }
 
@@ -3110,7 +3110,7 @@ void func(void)
   }
 
   array = resize_array(array, NEW_SIZE);
-  if (0 == array) {
+  if (NULL == array) {
     // Handle Error
   }
 
