@@ -1501,15 +1501,7 @@ Reviewers: svoboda
 ``` c
 #include <stddef.h>
 
-void *malloc(size_t nbytes) {  // Undefined Behavior
-  void *ptr;
-  // Allocate storage from own pool and set ptr
-  return ptr;
-}
-
-void free(void *ptr) {         // Undefined Behavior
-  // Return storage to own pool
-}
+static void *malloc(size_t nbytes); // Undefined Behavior
 ```
 
 Cite: CERT C Rule DCL37-C 4th NCCE 3.4.7

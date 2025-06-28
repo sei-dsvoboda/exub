@@ -51,6 +51,11 @@ Added remaining examples from CERT rules, recs, and TS 17961.
 
 New examples.c18.md for UBs from C18 that no longer exist in C23.
 
+### Late June 2025 commit & notes
+
+Fixed example 104. The example comprised function definitions rather than
+declarations, and both had external linkage.
+
 ## Development Rules
 
 Here are some rules that the examples should comply with:
