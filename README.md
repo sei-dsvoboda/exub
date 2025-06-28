@@ -51,6 +51,29 @@ Added remaining examples from CERT rules, recs, and TS 17961.
 
 New examples.c18.md for UBs from C18 that no longer exist in C23.
 
+### Late June 2025 commit & notes
+
+Modified use of whitespace in examples where necessary to unify the style of the
+document and match the style used in K&R's book. Braces are placed at the start
+of a line when they enclose a function definition. Asterisks are placed such
+that they accurately reflect the grammar of the language (in which * is part of
+a declarator, not part of the declaration-specifiers).
+
+Fixed errors and style of example 157: _file instead of *file, use of 0 as a
+null pointer constant, use of undefined macro IOFBF and a redundant check for
+buf == NULL. Substituted a read of the buffer for a write, because that seems
+like a more straightforward example of using the contents of the array.
+
+Fixed example 104. The example comprised function definitions rather than
+declarations, and both had external linkage.
+
+Removed redundant casts of the result of malloc and realloc.
+Fixed another instance of misuse of _ in place of *.
+
+Stop using 0 as a null pointer constant, for clarity.
+
+Clarify the rules for reserved identifiers in example 105.
+
 ## Development Rules
 
 Here are some rules that the examples should comply with:

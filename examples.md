@@ -27,7 +27,8 @@ Reviewers: svoboda
 ``` c
 #define assign(uc1, uc2, val) uc1##uc2 = val
 
-void func(void) {
+void func(void)
+{
   int \u0401;
   // ...
   assign(\u04, 01, 4);   // Undefined Behavior
@@ -44,7 +45,8 @@ Reviewers: svoboda
 ``` c
 #include <stdio.h>
 
-int main(float argc) {  // Undefined Behavior
+int main(float argc) // Undefined Behavior
+{
   printf("main argument count:%f\n", argc); 
   return 0;
 }
@@ -60,17 +62,20 @@ Reviewers: s.maddanimath, svoboda, UBSG, j.myers
 
 static atomic_bool flag = ATOMIC_VAR_INIT(false);
 
-void init_flag(void) {
+void init_flag(void)
+{
   atomic_init(&flag, false);
 }
 
-void toggle_flag(void) {
+void toggle_flag(void)
+{
   bool temp_flag = atomic_load(&flag);
   temp_flag = !temp_flag;
   atomic_store(&flag, temp_flag);  // Undefined Behavior, race condition
 }
 
-bool get_flag(void) {
+bool get_flag(void)
+{
   return atomic_load(&flag);       // Undefined Behavior, race condition
 }
 ```
@@ -121,7 +126,8 @@ Note: the following is a different example which is more complex:
 
 ``` c
 static int a;
-int f(void) {
+int f(void)
+{
   int a;
   {
      extern int a; // Undefined Behavior, not internal!
@@ -136,13 +142,15 @@ Reviewers: svoboda, uecker, j.myers
 ### 9\. An object is referred to outside of its lifetime (6.2.4).
 
 ``` c
-void squirrel_away(char **ptr_param) {
+void squirrel_away(char **ptr_param)
+{
   char local[10];
   // Initialize array ...
   *ptr_param = local;
 }
 
-void rodent(void) {
+void rodent(void)
+{
   char *ptr;
   squirrel_away(&ptr);
   // Undefined Behavior if ptr is ever read here
@@ -158,17 +166,20 @@ Reviewers: svoboda
 
 ``` c
 const char *p;
-void dont_do_this(void) {
+void dont_do_this(void)
+{
   const char c_str[] = "This will change";
   p = c_str; // Undefined Behavior if p subsequently read
 }
 
-void innocuous(void) {
+void innocuous(void)
+{
   const char c_str[] = "Surprise, surprise";
   puts(c_str);
 }
 
-int main(void) {
+int main(void)
+{
   dont_do_this();
   innocuous();
   puts(p);  // On some platforms, this will print "Surprise, surprise"
@@ -183,7 +194,8 @@ Reviewers: svoboda
 ### 11\. The value of an object with automatic storage duration is used while the object has an indeterminate representation (6.2.4, 6.7.11, 6.8).
 
 ``` c
-void get_sign(int number, int *sign) {
+void get_sign(int number, int *sign)
+{
   if (sign == NULL) {
     // ...
   }
@@ -194,7 +206,8 @@ void get_sign(int number, int *sign) {
   } // If number == 0, sign is not changed.
 }
 
-int is_negative(int number) {
+int is_negative(int number)
+{
   int sign;
   get_sign(number, &sign);
   return (sign < 0);  // Undefined Behavior, sign might not be initialized
@@ -210,8 +223,9 @@ Reviewers: svoboda
 ### 12\. A non-value representation is read by an lvalue expression that does not have character type (6.2.6.1).
 
 ``` c
-void f(size_t n) {
-  int *a = (int *)malloc(n * sizeof(int));
+void f(size_t n)
+{
+  int *a = malloc(n * sizeof(int));
   if (a != NULL) {
     for (size_t i = 0; i != n; ++i) {
       a[i] = a[i] ^ a[i]; // Undefined Behavior
@@ -247,7 +261,8 @@ Reviewers: svoboda
 // In a.c:
 extern int i;  // Undefined Behavior
 
-int f(void) {
+int f(void)
+{
   return ++i;
 }
 
@@ -276,7 +291,8 @@ Reviewers: svoboda
 ### 16\. Conversion to or from an integer type produces a value outside the range that can be represented (6.3.1.4).
 
 ``` c
-void func(float f_a) {
+void func(float f_a)
+{
   int i_a;
   i_a = f_a;  // Undefined Behavior if the integral part of f_a cannot be represented.
 }
@@ -289,7 +305,8 @@ Reviewers: svoboda
 ### 17\. Demotion of one real floating type to another produces a value outside the range that can be represented (6.3.2.1).
 
 ``` c
-void func(double d_a, long double big_d) {
+void func(double d_a, long double big_d)
+{
   double d_b = (float)big_d;  // Undefined Behavior, if outside range
   float f_a = (float)d_a;     // Undefined Behavior, if outside range
   float f_b = (float)big_d;   // Undefined Behavior, if outside range
@@ -310,7 +327,8 @@ Reviewers:
 
 ``` c
 struct f *p;
-void g(void) {
+void g(void)
+{
   *p;   // Undefined Behavior
 }
 ```
@@ -320,7 +338,8 @@ Reviewers: uecker, j.myers
 ### 20\. An lvalue designating an object of automatic storage duration that could have been declared with the register storage class is used in a context that requires the value of the designated object, but the object is uninitialized. (6.3.2.1).
 
 ``` c
-void f(void) {
+void f(void)
+{
   /* register */ int x;  // address of x not taken, so x could be stored in a register
   int y = x;             // Undefined Behavior
 }
@@ -331,7 +350,8 @@ Reviewers: svoboda, uecker, j.myers
 ### 21\. An lvalue having array type is converted to a pointer to the initial element of the array, and the array object has register storage class (6.3.2.1).
 
 ``` c
-void f(void) {
+void f(void)
+{
   register int a[3];
   int *p = a;  // Undefined Behavior
   a[0] = 1;
@@ -344,11 +364,12 @@ Reviewers: svoboda
 ### 22\. An attempt is made to use the value of a void expression, or an implicit or explicit conversion (except to void) is applied to a void expression (6.3.2.2).
 
 ``` c
-void f(int x) {
+void f(int x)
+{
   printf("x is %d\n", x);
 }
 
-void* p = (void*) f;
+void *p = (void *) f;
 int (*g)(int) = p;
 int y = g(123);   // Undefined Behavior
 printf("y is %d\n", y);
@@ -359,7 +380,8 @@ Reviewers: svoboda
 ### 23\. Conversion of a pointer to an integer type produces a value outside the range that can be represented (6.3.2.3).
 
 ``` c
-void f(void) {
+void f(void)
+{
   char *ptr;
   // ...
   unsigned int number = (unsigned int)ptr;  // Undefined Behavior
@@ -374,7 +396,8 @@ Reviewers: svoboda
 ### 24\. Conversion between two pointer types produces a result that is incorrectly aligned (6.3.2.3).
 
 ``` c
-void f(void) {
+void f(void)
+{
   int *i_ptr;
   char c;
   i_ptr = (int *)&c;  // Undefined Behavior
@@ -390,7 +413,8 @@ Reviewers: svoboda
 
 ``` c
 char *(*fp)();
-void f(void) {
+void f(void)
+{
   char *c;
   fp = strchr;
   c = fp(12, 2);  // Undefined Behavior, incorrect arguments
@@ -446,14 +470,15 @@ Reviewers: svoboda
 
 ``` c
 // In bash/bashline.h:
-extern char* bash_groupname_completion_function(const char *, int);
+extern char *bash_groupname_completion_function(const char *, int);
 // Undefined Behavior, the identifier exceeds 31 characters
 
 
 // In a.c:
 #include <bashline.h>
 
-void w(const char *s, int i) {
+void w(const char *s, int i)
+{
   bash_groupname_completion_function(s, i);
   // This function was taken from GNU Bash, version 3.2.
   // https://www.gnu.org/software/bash/
@@ -480,7 +505,8 @@ Reviewers: svoboda, j.myers
 ### 32\. The program attempts to modify a string literal (6.4.5).
 
 ``` c
-void f1(void) {
+void f1(void)
+{
   char *p = "string literal";
   p[0] = 'S';  // Undefined Behavior
   // ...
@@ -505,7 +531,8 @@ Reviewers: svoboda, j.myers
 ``` c
 #define CUBE(X) ((X) * (X) * (X))
  
-void func(void) {
+void func(void)
+{
   int i = 2;
   int a = 81 / CUBE(++i);  // Undefined Behavior
   // ...
@@ -519,7 +546,8 @@ Reviewers: svoboda
 ### 35\. An exceptional condition occurs during the evaluation of an expression (6.5.).
 
 ``` c
-int add(void) {
+int add(void)
+{
   int x;
   // Initialize x with an untrusted value, which could be INT_MAX
   return x + 1;    // Undefined Behavior
@@ -533,7 +561,8 @@ Reviewers: svoboda
 ### 36\. An object has its stored value accessed other than by an lvalue of an allowable type (6.5.1).
 
 ``` c
-void f(void) {
+void f(void)
+{
   if (sizeof(int) == sizeof(float)) {
     float f = 0.0f;
     int *ip = (int *)&f;
@@ -552,12 +581,14 @@ Reviewers: svoboda
 
 ``` c
 // In somefile.c:
-long f(long x) {
+long f(long x)
+{
   return x < 0 ? -x : x;
 }
 
 // In otherfile.c:
-int g(int x) {
+int g(int x)
+{
   return f(x);  // Undefined Behavior
 }
 ```
@@ -580,7 +611,7 @@ Reviewers: uecker, svoboda, j.myers
 ### 39\. The operand of the unary \* operator has an invalid value (6.5.4.2).
 
 ``` c
-char* p = NULL;
+char *p = NULL;
 *p;   // Undefined Behavior
 ```
 
@@ -590,7 +621,8 @@ Reviewers: svoboda, j.myers
 
 ``` c
 struct f { struct f *x; } *p;
-void g(void) {
+void g(void)
+{
   (struct f)p;
 }
 ```
@@ -600,7 +632,8 @@ Note: Removed from J.2. by [N3244](https://www.open-std.org/jtc1/sc22/wg14/www/d
 ### 41\. The value of the second operand of the / or % operator is zero (6.5.6).
 
 ``` c
-int divide(int x) {
+int divide(int x)
+{
   int y;
   // Initialize y with an untrusted value, which could be 0
   return x / y;  // Undefined Behavior
@@ -614,7 +647,8 @@ Reviewers: svoboda
 ### 42\. If the quotient a/b is not representable, the behavior of both a/b and a%b (6.5.6).
 
 ``` c
-int remainder(int x) {
+int remainder(int x)
+{
   int y;
   // Initialize y with an untrusted value, which could be 0
   return x % y;  // Undefined Behavior
@@ -631,7 +665,8 @@ Reviewers: svoboda
 #define TABLESIZE 100
 static int table[TABLESIZE];
 
-int *f(int index) {
+int *f(int index)
+{
   if (index < TABLESIZE) {
     return table + index;   // Undefined Behavior
   }
@@ -647,8 +682,9 @@ Reviewers: svoboda
 
 ``` c
 #define MAX_MACHINE_NAME_LENGTH 64
-char *get_machine_name(const char *path) {
-  char *machine_name = (char *)malloc(MAX_MACHINE_NAME_LENGTH + 1);
+char *get_machine_name(const char *path)
+{
+  char *machine_name = malloc(MAX_MACHINE_NAME_LENGTH + 1);
   if (machine_name == NULL) {
     return NULL;
   }
@@ -671,7 +707,8 @@ Reviewers: svoboda
 ``` c
 #define SIZE 256
 
-void f(void) {
+void f(void)
+{
   int nums[SIZE];
   char *c_str[SIZE];
   int *next_num_ptr = nums;
@@ -696,7 +733,8 @@ Reviewers: svoboda
 enum { COLS = 5, ROWS = 7 };
 static int matrix[ROWS][COLS];
 
-void init_matrix(int x) {
+void init_matrix(int x)
+{
   for (size_t i = 0; i != COLS; ++i) {
     for (size_t j = 0; j != ROWS; ++j) {
       matrix[i][j] = x;  // Undefined Behavior, i and j swapped
@@ -715,10 +753,10 @@ Reviewers: svoboda
 #include <stdlib.h>
 
 size_t size = 1 + (SIZE_MAX / 2);     // Assumes sizeof(size_t) == sizeof(ptrdiff_t)
-char* x = malloc(size);
-assert(x != 0);
-char* start = x;
-char* too_far = x + size;
+char *x = malloc(size);
+assert(x != NULL);
+char *start = x;
+char *too_far = x + size;
 ptrdiff_t too_big = too_far - start;  // Undefined Behavior
 ```
 
@@ -727,7 +765,8 @@ Reviewers: svoboda
 ### 48\. An expression is shifted by a negative number or by an amount greater than or equal to the width of the promoted expression (6.5.8).
 
 ``` c
-void func(unsigned int ui_a, unsigned int ui_b) {
+void func(unsigned int ui_a, unsigned int ui_b)
+{
   unsigned int uresult = ui_a << ui_b;  
   // Undefined Behavior if !( 0 < ui_b < sizeof(ui_a) / CHAR_BIT)
 }
@@ -744,7 +783,8 @@ Reviewers: svoboda
 #include <stddef.h>
 #include <inttypes.h>
 
-void func(signed long si_a, signed long si_b) {
+void func(signed long si_a, signed long si_b)
+{
   signed long result;
   if (si_a > (LONG_MAX >> si_b)) {
     // Handle Error
@@ -778,8 +818,8 @@ Reviewers: uecker, svoboda, j.myers
 ``` c
 const size_t limit = sizeof(int) + 1;
 char bytes[limit];
-int *p1 = (int*) &(bytes[0]);
-int *p2 = (int*) &(bytes[1]); // overlaps with p1 (unless sizeof(int) == 1)
+int *p1 = (int *) &(bytes[0]);
+int *p2 = (int *) &(bytes[1]); // overlaps with p1 (unless sizeof(int) == 1)
 *p1 = 123;
 *p2 = *p1;                    // Undefined Behavior
 ```
@@ -811,7 +851,10 @@ Reviewers: svoboda
 EXTENDED COMPILABLE EXAMPLE: Consider a platform that allows function calls to be used in constant integer expressions.
 
 ``` c
-int square(int x) {return x*x;}
+int square(int x)
+{
+  return x*x;
+}
 
 enum people {
   Tom=1,
@@ -875,7 +918,8 @@ struct S {
   char buf[];  // Flexible array member
 };
 
-const char *find(const struct S *s, int c) {
+const char *find(const struct S *s, int c)
+{
   const char *first = s->buf;
   const char *last = s->buf + s->len;
 
@@ -887,8 +931,9 @@ const char *find(const struct S *s, int c) {
   return NULL;
 }
 
-void g(void) {
-  struct S *s = (struct S *)malloc(sizeof(struct S));
+void g(void)
+{
+  struct S *s = malloc(sizeof(struct S));
   if (s == NULL) {
     // Handle Error
   }
@@ -912,7 +957,8 @@ const int **ipp;
 int *ip;
 const int i = 42;
 
-void func(void) {
+void func(void)
+{
   ipp = &ip;  // Constraint violation
   *ipp = &i;  // Valid
   *ip = 0;    // Undefined Behavior, modifies constant i (was 42)
@@ -928,7 +974,8 @@ Reviewers: svoboda
 ``` c
 #include <stdio.h>
 
-void func(void) {
+void func(void)
+{
   static volatile int **ipp;
   static int *ip;
   static volatile int i = 0;
@@ -936,7 +983,7 @@ void func(void) {
   printf("i = %d.\n", i);
 
   ipp = &ip;          // Undefined Behavior
-  ipp = (int**) &ip;  // Undefined Behavior
+  ipp = (int **) &ip;  // Undefined Behavior
   *ipp = &i;          // Valid
   if (*ip != 0) {     // Valid
     // ...
@@ -982,7 +1029,8 @@ Reviewers: svoboda
 ### 65\. An object which has been modified is accessed through a restrict-qualified pointer to a const-qualified type, or through a restrict-qualified pointer and another pointer that are not both based on the same object (6.7.4.2).
 
 ``` c
-void abcabc(void) {
+void abcabc(void)
+{
   char c_str[]= "abc123edf";
   char *ptr1 = c_str;
   char *ptr2 = c_str + strlen("abc");
@@ -1003,7 +1051,8 @@ int *restrict a;
 int *restrict b;
 extern int c[];
 
-int main(void) {
+int main(void)
+{
   c[0] = 17;
   c[1] = 18;
   a = &c[0];
@@ -1032,7 +1081,8 @@ Note: Removed from J.2. by [N3244](https://www.open-std.org/jtc1/sc22/wg14/www/d
 ``` c
 #include <stdnoreturn.h>
 
-_Noreturn void f(void) {
+_Noreturn void f(void)
+{
   return;  // Undefined Behavior at run-time
 }
 ```
@@ -1085,7 +1135,8 @@ Reviewers: svoboda
 
 ``` c
 enum { ROWS = 10, COLS = 15 };
-void func(void) {
+void func(void)
+{
   int a[ROWS][COLS];
   int (*b)[ROWS] = a;  // Undefined Behavior
 }
@@ -1100,7 +1151,8 @@ Reviewers: svoboda
 ``` c
 const int size = 5;
 
-int average(int numbers[static size]) {
+int average(int numbers[static size])
+{
   int sum = 0;
   for (int i = 0; i < size; i++) {
     sum += numbers[i];
@@ -1108,7 +1160,8 @@ int average(int numbers[static size]) {
   return sum / size;
 }
 
-int main(void) {
+int main(void)
+{
   int a[3] = { 4, 1002, 27 };
   int result = average(a);   // Undefined Behavior, array too small
   printf("Average is %d\n", result);
@@ -1131,16 +1184,25 @@ Reviewers: svoboda
 ### 76\. In a context requiring two function types to be compatible, they do not have compatible return types, or their parameters disagree in use of the ellipsis terminator or the number and type of parameters (after default argument promotion, when there is no parameter type list) (6.7.7.4).
 
 ``` c
-void fi(int* a) { (*a)++;}
-void fl(long* a) { (*a)++;}
+void fi(int *a)
+{
+  (*a)++;
+}
 
-int repeat(void f(), int* a) {
+void fl(long *a)
+{
+  (*a)++;
+}
+
+int repeat(void f(), int *a)
+{
   f(a);
   f(a);
   f(a);
 }
 
-int main () {
+int main ()
+{
   int x = 1;
   repeat(fi, &x); // Undefined Behavior
   return 0;
@@ -1152,7 +1214,8 @@ Reviewers: svoboda
 ### 77\. A declaration for which a type is inferred contains a pointer, array, or function declarators (6.7.10).
 
 ``` c
-double double_double(double x) {
+double double_double(double x)
+{
   return x * 2;
 }
 
@@ -1220,7 +1283,8 @@ Reviewers: svoboda
 
 ``` c
 // In file1.c:
-int add(int first, int second) {
+int add(int first, int second)
+{
   return first + second;
 }
 
@@ -1230,7 +1294,8 @@ int add(int first, int second) {
 
 int add(int first, int second, ...);
 
-int main () {
+int main ()
+{
   int result = add(2, 3, 5, 7, 11, -1);   // Undefined Behavior
   printf("Sum is %d\n", result);
   return 0;
@@ -1245,14 +1310,16 @@ Reviewers: svoboda
 #include <string.h>
 #include <stdio.h>
 
-int checkpass(const char *password) {
+int checkpass(const char *password)
+{
   if (strcmp(password, "pass") == 0) {
     return 1;
   }
   // Undefined Behavior, no return value
 }
 
-void func(const char *userinput) {
+void func(const char *userinput)
+{
   if (checkpass(userinput)) {
     printf("Success\n");
   }
@@ -1318,7 +1385,8 @@ Reviewers: svoboda
 ``` c
 #include <string.h>
 
-void func(const char *src) {
+void func(const char *src)
+{
   // Validate the source string; calculate size
   char *dest;
   // malloc() destination string
@@ -1341,7 +1409,7 @@ Reviewers: svoboda
 
 ``` c
 #define s(x) #x
-char* x = "s(\)";  // Ill-formed, lone single quote
+char *x = "s(\)";  // Ill-formed, lone single quote
 ```
 
 HYPOTHETICAL COMPILABLE EXAMPLE?
@@ -1401,7 +1469,8 @@ Reviewers: svoboda
 ``` c
 #include <string.h>
 
-void func(void) {
+void func(void)
+{
   char c_str[]= "test string";
   char *ptr1 = c_str;
   char *ptr2;
@@ -1443,14 +1512,16 @@ Reviewers: svoboda
 ``` c
 #include <stdio.h>
 
-double sin(double x) {
+double sin(double x)
+{
   return x - 3.0;
 }
 
 #include <math.h>
 // Undefined Behavior, sin() already defined
 
-int main(void) {
+int main(void)
+{
   double p = 3.14; // almost pi
   printf("sin( %f) is %f\n", p, sin(p));
   return 0;
@@ -1475,15 +1546,7 @@ Reviewers: svoboda
 ``` c
 #include <stddef.h>
 
-void *malloc(size_t nbytes) {  // Undefined Behavior
-  void *ptr;
-  // Allocate storage from own pool and set ptr
-  return ptr;
-}
-
-void free(void *ptr) {         // Undefined Behavior
-  // Return storage to own pool
-}
+static void *malloc(size_t nbytes); // Undefined Behavior
 ```
 
 Cite: CERT C Rule DCL37-C 4th NCCE 3.4.7
@@ -1493,12 +1556,18 @@ Reviewers: svoboda
 ### 105\. The program declares or defines a reserved identifier, other than as allowed by 7.1.4 (7.1.3).
 
 ``` c
+// Identifiers that begin with _ are reserved at file scope.
 static const unsigned int _max_limit = 1024; // Undefined Behavior
 unsigned int _limit = 100; // Undefined Behavior
-// Identifiers that begin with _ are reserved.
+struct _data; // Undefined Behavior
 
-unsigned int getValue(unsigned int count) {
-  return count < _limit ? count : _limit;
+/* Identifiers that begin with __ or _ followed by an uppercase letter
+   are reserved for any use. */
+unsigned int getValue(unsigned int __count) // Undefined Behavior
+{
+  static unsigned int _CallCount; // Undefined Behavior
+  _CallCount++;
+  return __count < _limit ? __count : _limit;
 }
 ```
 
@@ -1528,8 +1597,9 @@ Reviewers: svoboda, j.myers
 ### 108\. The pointer passed to a library function array parameter does not have a value such that all address computations and object accesses are valid (7.1.4).
 
 ``` c
-void f1(size_t nchars) {
-  char *p = (char *)malloc(nchars);
+void f1(size_t nchars)
+{
+  char *p = malloc(nchars);
   const size_t n = nchars + 1;
   if (p) {
     memset(p, 0, n); // Undefined Behavior, 1-byte buffer overflow
@@ -1549,11 +1619,13 @@ Reviewers: svoboda
 
 typedef void (*handler_type)(int);
 
-void execute_handler(handler_type handler, int value) {
+void execute_handler(handler_type handler, int value)
+{
   handler(value);
 }
 
-void func(int e) {
+void func(int e)
+{
   execute_handler(&(assert), e < 0);  // Undefined Behavior
 }
 ```
@@ -1576,7 +1648,8 @@ Reviewers: svoboda
 ### 111\. The CX\_LIMITED\_RANGE, FENV\_ACCESS, or FP\_CONTRACT pragma is used in any context other than outside all external declarations or preceding all explicit declarations and statements inside a compound statement (7.3.4, 7.6.1, 7.12.2).
 
 ``` c
-void f(void) {
+void f(void)
+{
   float a = 4.0 / 7;
   #pragma STDC FP_CONTRACT OFF
   a *= 7;   // Undefined Behavior
@@ -1589,7 +1662,8 @@ Reviewers: svoboda
 ### 112\. The value of an argument to a character handling function is neither equal to the value of EOF nor representable as an unsigned char (7.4).
 
 ``` c
-size_t count_preceding_whitespace(const char *s) {
+size_t count_preceding_whitespace(const char *s)
+{
   const char *t = s;
   size_t length = strlen(s) + 1;
 
@@ -1675,7 +1749,8 @@ Reviewers: svoboda
 ### 119\. The program modifies the string pointed to by the value returned by the setlocale function (7.11.1.1).
 
 ``` c
-void f1(void) {
+void f1(void)
+{
   char *locale = setlocale(LC_ALL, 0);
   if (locale != NULL) {
     char *cats[8];
@@ -1716,7 +1791,8 @@ Reviewers: svoboda, j.myers
 ### 121\. The program modifies the structure pointed to by the value returned by the localeconv function (7.11.2.1).
 
 ``` c
-void f2(void) {
+void f2(void)
+{
   struct lconv *conv = localeconv();
   if ('\0' == conv->decimal_point[0]) {
     conv->decimal_point = ".";   // Undefined Behavior
@@ -1757,7 +1833,7 @@ Reviewers: svoboda
 ``` c
 #include <setjmp.h>
 
-int setjmp(char* foo);  // Undefined Behavior
+int setjmp(char *foo);  // Undefined Behavior
 ```
 
 Reviewers: svoboda, j.myers
@@ -1767,7 +1843,8 @@ Reviewers: svoboda, j.myers
 ``` c
 jmp_buf buf;
 
-void f(void) {
+void f(void)
+{
   int i = setjmp(buf);  // Undefined Behavior
   if (i == 0) {
     g();
@@ -1776,7 +1853,8 @@ void f(void) {
   }
 }
 
-void g(void) {
+void g(void)
+{
   // ...
   longjmp(buf, 1);
 }
@@ -1796,7 +1874,8 @@ Reviewers: svoboda
 static jmp_buf buf;
 static void bad(void);
 
-static void g(void) {
+static void g(void)
+{
   if (setjmp(buf) == 0) {
     printf("setjmp() invoked\n");
   } else {
@@ -1804,26 +1883,31 @@ static void g(void) {
   }
 }
 
-static void f(void) {
+static void f(void)
+{
   g();
 }
 
-static void setup(void) {
+static void setup(void)
+{
   f();
 }
 
-void do_stuff(void) {
+void do_stuff(void)
+{
   void (*b)(void) = bad;
   // ...
   longjmp(buf, 1);   // Undefined Behavior
 }
 
-static void bad(void) {
+static void bad(void)
+{
   printf("Should not be called!\n");
   exit(1);
 }
 
-int main(void) {
+int main(void)
+{
   setup();
   do_stuff();
 }
@@ -1838,7 +1922,8 @@ Reviewers: svoboda
 ``` c
 jmp_buf buf;
 
-void f(void) {
+void f(void)
+{
   int i = 0;
   if (setjmp(buf) != 0) {
     printf("%i\n", i);      // Undefined Behavior
@@ -1848,7 +1933,8 @@ void f(void) {
   g();
 }
 
-void g(void) {
+void g(void)
+{
   // ...
   longjmp(buf, 1);
 }
@@ -1879,14 +1965,16 @@ Reviewers: svoboda
 
 volatile sig_atomic_t denom;
 
-void sighandle(int s) {
+void sighandle(int s)
+{
   // Fix the offending volatile
   if (denom == 0) {
     denom = 1;
   }
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
   if (argc < 2) {
     return 0;
   }
@@ -1922,18 +2010,21 @@ Reviewers: svoboda
 ### 131\. A signal occurs as the result of calling the abort or raise function, and the signal handler calls the raise function (7.14.1.1).
 
 ``` c
-void term_handler(int signum) {
+void term_handler(int signum)
+{
   // SIGTERM handling specific ...
 }
 
-void int_handler(int signum) {
+void int_handler(int signum)
+{
   // SIGINT handling specific ...
   if (raise(SIGTERM) != 0) {   // Undefined Behavior
     // Handle Error
   }
 }
 
-int main(void) {
+int main(void)
+{
   if (signal(SIGTERM, term_handler) == SIG_ERR) {
     // Handle Error
   }
@@ -1964,16 +2055,18 @@ Reviewers: svoboda
 #define MAX_MSG_SIZE 24
 char *err_msg;
 
-void handler(int signum) {
+void handler(int signum)
+{
   if ((strcpy(err_msg, "SIGINT detected.")) == err_msg){ // Undefined Behavior
     // ...
   }
 }
 
-int main(void) {
+int main(void)
+{
   signal(SIGINT, handler);
 
-  err_msg = (char *)malloc(MAX_MSG_SIZE);
+  err_msg = malloc(MAX_MSG_SIZE);
   if (err_msg == NULL) {
     /// Handle Error
   }
@@ -2000,14 +2093,16 @@ Reviewers: svoboda
 
 typedef void (*pfv)(int);
 
-void handler(int signum) {
+void handler(int signum)
+{
   pfv old_handler = signal(signum, SIG_DFL);
   if (old_handler == SIG_ERR) {
     perror("SIGINT handler"); // Undefined Behavior
     // Handle Error
   }
 }
-int main(void) {
+int main(void)
+{
   pfv old_handler = signal(SIGINT, handler);
   if (old_handler == SIG_ERR) {
     perror("SIGINT handler");
@@ -2034,11 +2129,13 @@ Reviewers: svoboda
 enum { MAXLINE = 1024 };
 static jmp_buf env;
 
-void handler(int signum) {
+void handler(int signum)
+{
   longjmp(env, 1);
 }
 
-void log_message(char *info1, char *info2) {
+void log_message(char *info1, char *info2)
+{
   static char *buf = NULL;
   static size_t bufsize;
   char buf0[MAXLINE];
@@ -2058,7 +2155,8 @@ void log_message(char *info1, char *info2) {
   }
 }
 
-int main(void) {
+int main(void)
+{
   if (signal(SIGINT, handler) == SIG_ERR) {
     // Handle Error
   }
@@ -2093,19 +2191,22 @@ Reviewers: svoboda
 
 volatile sig_atomic_t flag = 0;
 
-void handler(int signum) {
+void handler(int signum)
+{
   flag = 1;
 }
 
 // Runs until user sends SIGUSR1
-int func(void *data) {
+int func(void *data)
+{
   while (!flag) {
     // ...
   }
   return 0;
 }
 
-int main(void) {
+int main(void)
+{
   signal(SIGUSR1, handler);  // Undefined Behavior
   thrd_t tid;
 
@@ -2127,7 +2228,8 @@ Reviewers: svoboda
 #include <stdio.h>
 #include <stdarg.h>
 
-void f(int last, ...) {
+void f(int last, ...)
+{
   va_list args;
   int number = va_arg(args, int);  // Undefined Behavior
   va_start( args, last);           // Oops, should precede va_args!
@@ -2135,7 +2237,8 @@ void f(int last, ...) {
   va_end(args);
 }
 
-int main(void) {
+int main(void)
+{
   f(1, 2, 3);
   return 0;
 }
@@ -2149,12 +2252,14 @@ Reviewers: svoboda, j.myers
 #include <stdio.h>
 #include <stdarg.h>
 
-void g(va_list args) {
+void g(va_list args)
+{
   int number = va_arg(args, int);
   printf("The first variadic number is %d\n", number);
 }
 
-void f(int last, ...) {
+void f(int last, ...)
+{
   va_list args;
   va_start( args, last);
   g(args);
@@ -2163,7 +2268,8 @@ void f(int last, ...) {
   va_end(args);
 }
 
-void main(void) {
+void main(void)
+{
   f(1, 2, 3);
 }
 ```
@@ -2178,7 +2284,10 @@ Reviewers: svoboda, j.myers
 // Undefined Behavior
 #undef va_arg
 
-int va_arg(void) {return 123;}
+int va_arg(void)
+{
+  return 123;
+}
 ```
 
 Reviewers: svoboda
@@ -2188,7 +2297,8 @@ Reviewers: svoboda
 ``` c
 #include <stdarg.h>
 
-void f(int last, ...) {
+void f(int last, ...)
+{
   va_list args;
   va_start( args, last);
   // Undefined Behavior, missing va_end(args)
@@ -2202,7 +2312,8 @@ Reviewers: svoboda, j.myers
 ``` c
 enum { va_eol = -1 };
 
-unsigned int average(int first, ...) {
+unsigned int average(int first, ...)
+{
   unsigned int count = 0;
   unsigned int sum = 0;
   int i = first;
@@ -2235,18 +2346,20 @@ Reviewers: svoboda
 #include <stdio.h>
 #include <stdarg.h>
 
-int main(void) {
+int main(void)
+{
   int x[] = {1, 2};
   int y[] = {3, 4};
   my_printf("My data", x, y);
 }
 
-void my_printf(const char* prefix, ...) {
+void my_printf(const char *prefix, ...)
+{
   va_list args;
   int *x;
   int *y;
   va_start( args, prefix);
-  x = va_arg( args, int*);      // Valid
+  x = va_arg( args, int *);     // Valid
   y = va_arg( args, void());    // Undefined Behavior
   va_end( args);
   printf("%s: [%d, %d], [%d, %d]\n", prefix, x[0], x[1], y[0], y[1]);
@@ -2257,13 +2370,14 @@ HYPOTHETICAL COMPILABLE EXAMPLE? (ideally one that replaces a with a function po
 
 Reviewers: svoboda, UBSG
 
-### 142\. Using a null pointer constant in form of an integer expression as an argument to a ... function and then interpreting it as a void\* or char\* (7.16.1.1).
+### 142\. Using a null pointer constant in form of an integer expression as an argument to a ... function and then interpreting it as a void \* or char \* (7.16.1.1).
 
 ``` c
 #include <stdarg.h>
 #include <stdio.h>
 
-int contains_zero(size_t count, va_list ap) {
+int contains_zero(size_t count, va_list ap)
+{
   for (size_t i = 1; i < count; ++i) {
     if (va_arg(ap, double) == 0.0) {
       return 1;
@@ -2272,7 +2386,8 @@ int contains_zero(size_t count, va_list ap) {
   return 0;
 }
 
-int print_reciprocals(size_t count, ...) {
+int print_reciprocals(size_t count, ...)
+{
   va_list ap;
   va_start(ap, count);
 
@@ -2300,7 +2415,8 @@ Reviewers: svoboda
 ``` c
 #include <stdarg.h>
 
-void f(int last, ...) {
+void f(int last, ...)
+{
   va_list args;
   va_start( args, last);
   va_start( args, last);   // Undefined Behavior
@@ -2317,7 +2433,8 @@ Reviewers: svoboda, j.myers
 
 #define CUBE(X) ((X) * (X) * (X))
 
-void f(int last, ...) {
+void f(int last, ...)
+{
   va_list args;
   va_start( args, CUBE(last));   // Undefined Behavior
   va_end(args);
@@ -2340,7 +2457,8 @@ Reviewers: svoboda
 ### 146\. The type parameter of an offsetof macro defines a new type (7.21).
 
 ``` c
-int plus(int a, int b) {
+int plus(int a, int b)
+{
   return a+b;
 }
 
@@ -2377,7 +2495,7 @@ Reviewers: svoboda
 
 ``` c
 int i = 1;
-int* pi = &i;
+int *pi = &i;
 nullptr_t n = nullptr;
 memcpy(&n, pi, sizeof(n));
 pi = n; // Undefined Behavior
@@ -2414,8 +2532,9 @@ Reviewers: svoboda
 #include <stdio.h>
 #include <wchar.h>
 
-int main(void) {
-  FILE* in = fopen("foo.txt", "r");
+int main(void)
+{
+  FILE *in = fopen("foo.txt", "r");
 
   wchar_t wide_line[80];
   fgetws(wide_line, sizeof(wchar_t) * sizeof(wide_line), in);
@@ -2441,7 +2560,8 @@ Note: Removed from J.2. by [N3064](https://www.open-std.org/jtc1/sc22/wg14/www/d
 ``` c
 #include <stdio.h>
 
-int close_stdout(void) {
+int close_stdout(void)
+{
   if (fclose(stdout) == EOF) {
     return -1;
   }
@@ -2460,7 +2580,7 @@ Reviewers: svoboda
 ``` c
 #include <stdio.h>
 
-FILE* f = fopen("foo", "r");
+FILE *f = fopen("foo", "r");
 fflush(f);  // Undefined Behavior
 ```
 
@@ -2471,7 +2591,7 @@ Reviewers: svoboda, j.myers
 ``` c
 #include <stdio.h>
 
-FILE* f = fopen("foo", "read");  // Undefined Behavior
+FILE *f = fopen("foo", "read");  // Undefined Behavior
 ```
 
 Reviewers: svoboda, j.myers
@@ -2479,7 +2599,8 @@ Reviewers: svoboda, j.myers
 ### 156\. An output operation on an update stream is followed by an input operation without an intervening call to the fflush function or a file positioning function, or an input operation on an update stream is followed by an output operation with an intervening call to a file positioning function (7.23.5.3).
 
 ``` c
-void f(const char *filename, char append_data[BUFSIZ]) {
+void f(const char *filename, char append_data[BUFSIZ])
+{
   char data[BUFSIZ];
   FILE *file;
 
@@ -2509,13 +2630,13 @@ Reviewers: svoboda
 
 #define SIZE 1024
 char buf[SIZE];
-FILE _file = fopen("foo", "r");
-if (file == 0 ||
-    setvbuf(file, buf, buf ? IOFBF : IONBF, SIZE) != 0) {
+FILE *file = fopen("foo", "r");
+if (file == NULL ||
+    setvbuf(file, buf, _IOFBF, SIZE) != 0) {
   // Handle Error
 }
 // ...
-buf[0] = '\0';  // Undefined Behavior
+putchar(buf[0]);  // Undefined Behavior
 ```
 
 Reviewers: svoboda, j.myers
@@ -2523,7 +2644,8 @@ Reviewers: svoboda, j.myers
 ### 158\. There are insufficient arguments for the format in a call to one of the formatted input/output functions, or an argument does not have an appropriate type (7.23.6.1, 7.23.6.2, 7.31.2.1, 7.31.2.2).
 
 ``` c
-void f(void) {
+void f(void)
+{
   const char *error_msg = "Resource not available to user.";
   int error_type = 3;
   // ...
@@ -2555,7 +2677,8 @@ Reviewers: svoboda, UBSG, j.myers
 ``` c
 #include <stdio.h>
 
-void f(char c) {
+void f(char c)
+{
   printf("%.3c", c);  // Undefined Behavior
 }
 ```
@@ -2567,7 +2690,8 @@ Reviewers: svoboda, j.myers
 ``` c
 #include <stdio.h>
 
-void f(int i) {
+void f(int i)
+{
   printf("%*iX", i);  // Undefined Behavior
 }
 ```
@@ -2579,7 +2703,8 @@ Reviewers: svoboda, j.myers
 ``` c
 #include <stdio.h>
 
-void f(char* s) {
+void f(char *s)
+{
   printf("%0s", s);  // Undefined Behavior
 }
 ```
@@ -2591,7 +2716,8 @@ Reviewers: svoboda, j.myers
 ``` c
 #include <stdio.h>
 
-void f(int* pi) {
+void f(int *pi)
+{
   printf("%lp", pi);  // 'l' not defined for %p
 }
 ```
@@ -2614,7 +2740,8 @@ Reviewers: svoboda
 ``` c
 #include <stdio.h>
 
-void f(int* pi) {
+void f(int *pi)
+{
   printf("%-n", pi);  // Undefined Behavior
 }
 ```
@@ -2626,7 +2753,8 @@ Reviewers: svoboda, j.myers
 ``` c
 #include <stdio.h>
 
-void f(void) {
+void f(void)
+{
   printf("%-%");  // Undefined Behavior
 }
 ```
@@ -2638,7 +2766,8 @@ Reviewers: svoboda, j.myers
 ``` c
 #include <stdio.h>
 
-void f(int i) {
+void f(int i)
+{
   printf("%q", i);  // Undefined behavior, %q not defined
 }
 ```
@@ -2650,7 +2779,8 @@ Reviewers: svoboda, j.myers
 ``` c
 #include <stdio.h>
 
-void f(int i) {
+void f(int i)
+{
   printf("%*iX", INT_MAX, i);  // Undefined Behavior
 }
 ```
@@ -2665,7 +2795,8 @@ Reviewers: svoboda, j.myers
 #include <stdarg.h>
 
 // Assume this function is called with >INT_MAX arguments
-void f(int unused, ...) {
+void f(int unused, ...)
+{
   va_list args;
   va_start( args, unused);
 
@@ -2731,7 +2862,7 @@ Reviewers: svoboda, j.myers
 #include <stdio.h>
 
 char addr[] = "0x12345678"; // not produced by this code
-void* ptr;
+void *ptr;
 sscanf( addr, "%p", &ptr);  // Undefined Behavior
 ```
 
@@ -2743,7 +2874,8 @@ Reviewers: svoboda, j.myers
 #include <stdio.h>
 #include <stdarg.h>
 
-void f(int first, ...) {
+void f(int first, ...)
+{
   int local = 0;
   va_list args;
   va_start( args, local);          // Oops, not first fixed arg!
@@ -2758,7 +2890,7 @@ Reviewers: svoboda, j.myers
 ``` c
 const int buf_size = 100;
 char buf[buf_size];
-FILE* f = fopen("foo", "r");
+FILE *f = fopen("foo", "r");
 if (f == NULL) {
   printf("Can't open foo\n");
 }
@@ -2773,7 +2905,7 @@ Reviewers: svoboda
 ``` c
 const int buf_size = -1;      // Oops, should be > 0!
 char buf[buf_size];
-FILE* f = fopen("foo", "r");
+FILE *f = fopen("foo", "r");
 if (f == NULL) {
   printf("Can't open foo\n");
 }
@@ -2785,7 +2917,7 @@ Reviewers: svoboda
 ### 177\. The file position indicator for a binary stream is used after a call to the ungetc function where its value was zero before the call (7.23.7.10).
 
 ``` c
-FILE* f = fopen("foo", "rb");
+FILE *f = fopen("foo", "rb");
 if (f == NULL) {
   printf("Can't open foo\n");
 }
@@ -2799,7 +2931,7 @@ Reviewers: svoboda
 ### 178\. The file position indicator for a stream is used after an error occurred during a call to the fread or fwrite function (7.23.8.1, 7.23.8.2).
 
 ``` c
-FILE* f = fopen("foo", "rb");
+FILE *f = fopen("foo", "rb");
 if (f == NULL) {
   printf("Can't open foo\n");
 }
@@ -2818,7 +2950,7 @@ Reviewers: svoboda
 ### 179\. A partial element read by a call to the fread function is used (7.23.8.1).
 
 ``` c
-FILE* f = fopen("foo", "rb");
+FILE *f = fopen("foo", "rb");
 if (f == NULL) {
   printf("Can't open foo\n");
 }
@@ -2840,7 +2972,7 @@ Reviewers: svoboda
 ### 180\. The fseek function is called for a text stream with a nonzero offset and either the offset was not returned by a previous successful call to the ftell function on a stream associated with the same file or whence is not SEEK\_SET (7.23.9.2).
 
 ``` c
-FILE* f = fopen("foo", "r");
+FILE *f = fopen("foo", "r");
 if (f == NULL) {
   printf("Can't open foo\n");
 }
@@ -2852,7 +2984,8 @@ Reviewers: svoboda
 ### 181\. The fsetpos function is called to set a position that was not returned by a previous successful call to the fgetpos function on a stream associated with the same file (7.23.9.3).
 
 ``` c
-FILE *opener(const char *filename) {
+FILE *opener(const char *filename)
+{
   fpos_t offset;
   if (filename == NULL) {
     // ...
@@ -2883,7 +3016,7 @@ Reviewers: svoboda
 #include <assert.h>
 
 size_t size = 0;
-int _array = (int_) malloc(size * sizeof(int));
+int *array = malloc(size * sizeof(int));
 assert(array);
 array[0] = 123;  // Undefined Behavior, out-of-bounds write
 ```
@@ -2895,7 +3028,8 @@ Reviewers: svoboda, j.myers
 ``` c
 struct List { struct List *next; // ... };
 
-void free_list(struct List *head) {
+void free_list(struct List *head)
+{
   for (; head != NULL; head = head->next) {  // Undefined Behavior
     free(head);
   }
@@ -2909,9 +3043,10 @@ Reviewers: svoboda
 ### 184\. The pointer argument to the free or realloc function is unequal to a null pointer and does not match a pointer earlier returned by a memory management function, or the space has been deallocated by a call to free or realloc (7.24.3.3, 7.24.3.7).
 
 ``` c
-void f(size_t num_elem) {
+void f(size_t num_elem)
+{
   int error_condition = 0;
-  int *x = (int *)malloc(num_elem * sizeof(int));
+  int *x = malloc(num_elem * sizeof(int));
   if (x == NULL) {
     // ...
   }
@@ -2937,8 +3072,8 @@ Reviewers: svoboda
 #include <stdio.h>
 #include <stdlib.h>
 
-unsigned char* p = malloc(10);
-if (p != 0) {
+unsigned char *p = malloc(10);
+if (p != NULL) {
   printf("p[0] is %c\n", p[0]);  // Undefined Behavior
 }
 ```
@@ -2953,12 +3088,13 @@ Reviewers: svoboda, j.myers
 
 enum { OLD_SIZE = 10, NEW_SIZE = 20 };
 
-int *resize_array(int *array, size_t count) {
+int *resize_array(int *array, size_t count)
+{
   if (0 == count) {
     return 0;
   }
 
-  int *ret = (int *)realloc(array, count * sizeof(int));
+  int *ret = realloc(array, count * sizeof(int));
   if (!ret) {
     free(array);
     return 0;
@@ -2967,9 +3103,10 @@ int *resize_array(int *array, size_t count) {
   return ret;
 }
 
-void func(void) {
-  int *array = (int *)malloc(OLD_SIZE * sizeof(int));
-  if (0 == array) {
+void func(void)
+{
+  int *array = malloc(OLD_SIZE * sizeof(int));
+  if (NULL == array) {
     // Handle Error
   }
 
@@ -2978,7 +3115,7 @@ void func(void) {
   }
 
   array = resize_array(array, NEW_SIZE);
-  if (0 == array) {
+  if (NULL == array) {
     // Handle Error
   }
 
@@ -2997,12 +3134,14 @@ Reviewers: svoboda
 ``` c
 #include <stdlib.h>
 
-void exit1(void) {
+void exit1(void)
+{
   // Cleanup code ...
   return;
 }
 
-void exit2(void) {
+void exit2(void)
+{
   extern int some_condition;
   if (some_condition) {
     // More cleanup code ...
@@ -3011,7 +3150,8 @@ void exit2(void) {
   return;
 }
 
-int main(void) {
+int main(void)
+{
   if (atexit(exit1) != 0) {
     // Handle Error
   }
@@ -3036,11 +3176,13 @@ Reviewers: svoboda
 jmp_buf env;
 int val;
 
-void exit1(void) {
+void exit1(void)
+{
   longjmp(env, 1);  // Undefined Behavior
 }
 
-int main(void) {
+int main(void)
+{
   if (atexit(exit1) != 0) {
     // Handle Error
   }
@@ -3059,7 +3201,8 @@ Reviewers: svoboda
 ### 189\. The string set up by the getenv or strerror function is modified by the program (7.24.4.6, 7.26.6.3).
 
 ``` c
-void f3(void) {
+void f3(void)
+{
   char *shell_dir = getenv("SHELL");
 
   if (shell_dir != NULL) {
@@ -3079,11 +3222,13 @@ Reviewers: svoboda
 ### 190\. A signal is raised while the quick\_exit function is executing (7.24.4.7).
 
 ``` c
-void exit_handler(void) {
+void exit_handler(void)
+{
   raise(SIGINT);   // Undefined Behavior
 }
 
-int main(void) {
+int main(void)
+{
   if (atexit(exit_handler) != 0) {
     // Handle Error
   }
@@ -3109,7 +3254,8 @@ Reviewers: svoboda
 ``` c
 #include <stdlib.h>
 
-int compare(const void *a, const void *b) {
+int compare(const void *a, const void *b)
+{
     return (*(int *)a - *(int *)b);
 }
 
@@ -3124,7 +3270,8 @@ Reviewers: coates, svoboda
 ``` c
 #include <stdlib.h>
 
-int compare(const void *a, const void *b) {
+int compare(const void *a, const void *b)
+{
     *(int *)a = *(int *)a + 1;        // Modify array contents!
     return (*(int *)a - *(int *)b);
 }
@@ -3139,14 +3286,15 @@ Reviewers: coates, svoboda
 ### 194\. The array being searched by the bsearch function does not have its elements in proper order (7.24.5.1).
 
 ``` c
-int compare(const void *a, const void *b) {
-  return *(int*)a - *(int*)b;
+int compare(const void *a, const void *b)
+{
+  return *(int *)a - *(int *)b;
 }
 
 int arr[] = {2, 3, 5, 11, 7}; // Oops, mis-ordered array!
 int n = sizeof(arr)/sizeof(arr[0]);
 int key = 7;
-int *result = (int*)bsearch(&key, arr, n, sizeof(int), compare);
+int *result = (int *)bsearch(&key, arr, n, sizeof(int), compare);
 // Undefined Behavior
 ```
 
@@ -3183,7 +3331,8 @@ Reviewers: svoboda, j.myers
 #include <stddef.h>
 #include <string.h>
 
-void func(void) {
+void func(void)
+{
   wchar_t wide_str1[] = L"0123456789";
   wchar_t wide_str2[] = L"0000000000";
 
@@ -3200,7 +3349,7 @@ Reviewers: svoboda
 ``` c
 #include <string.h>
 
-char* c = 0;
+char *c = 0;
 int length = strlen(c); // Undefined Behavior
 ```
 
@@ -3223,7 +3372,8 @@ Reviewers: svoboda
 #include <string.h>
 #include <threads.h>
 
-int bar(void*) {
+int bar(void *)
+{
   char *t = strtok(NULL, "#,"); // Undefined Behavior
   return t[0];
 }
@@ -3264,8 +3414,8 @@ Reviewers: svoboda, j.myers
 #include <stdio.h>
 #include <errno.h>
 
-char* inval = strerror(EINVAL);
-char* perm = strerror(EPERM);
+char *inval = strerror(EINVAL);
+char *perm = strerror(EPERM);
 printf("Invalid: %s\n", inval); // Undefined Behavior, invalidated by perm
 printf("Permission: %s\n", perm);
 ```
@@ -3403,13 +3553,15 @@ Reviewers: svoboda, j.myers
 #include <stddef.h>
 #include <threads.h>
 
-int thread_func(void *arg) {
+int thread_func(void *arg)
+{
   // Do work ...
   thrd_detach(thrd_current());
   return 0;
 }
 
-int main(void) {
+int main(void)
+{
   thrd_t t;
 
   if (thrd_success != thrd_create(&t, thread_func, NULL)) {
@@ -3434,14 +3586,16 @@ Reviewers: svoboda
 ``` c
 #include <threads.h>
 
-void destructor(void* arg) {
+void destructor(void *arg)
+{
   tss_t key;
   if (thrd_success != tss_create(&key, 0)) { // Undefined Behavior
     // Handle Error
   }
 }
 
-int func(void*) {
+int func(void *)
+{
   tss_t key;
   if (thrd_success != tss_create(&key, destructor)) {
     // Handle Error
@@ -3451,7 +3605,8 @@ int func(void*) {
   return 0;
 }
 
-int foo(void*) {
+int foo(void *)
+{
   thrd_t thr;
   if (thrd_success != thrd_create(&thr, func, 0)) {
     // Handle Error
@@ -3472,21 +3627,24 @@ Reviewers: svoboda, j.myers
 ``` c
 #include <threads.h>
 
-void destructor(void* arg) {
+void destructor(void *arg)
+{
   tss_t key;
   if (thrd_success != tss_create(&key, 0)) { // Undefined Behavior
     // Handle Error
   }
 }
 
-int func(void*) {
+int func(void *)
+{
   tss_t key;
   static char str[] = "Hello";
   tss_set(key, str); // Undefined Behavior, key not initialized by tss_create()
   return 0;
 }
 
-int foo(void*) {
+int foo(void *)
+{
   thrd_t thr;
   if (thrd_success != thrd_create(&thr, func, 0)) {
     // Handle Error
@@ -3509,19 +3667,21 @@ Reviewers: svoboda, j.myers
 #include <threads.h>
 #include <time.h>
 
-char* now = 0;
+char *now = 0;
 
-int bar(void*) {
+int bar(void *)
+{
   time_t n1;
   if ((time_t) -1 == time(&n1)) {
     // Handle Error
   }
-  struct tm* n2 = localtime(&n1);
+  struct tm *n2 = localtime(&n1);
   now = asctime(n2);
   return 0;
 }
 
-void foo(void) {
+void foo(void)
+{
   thrd_t thr;
   if (thrd_success != thrd_create(&thr, bar, 0)) {
     // Handle Error
@@ -3543,7 +3703,8 @@ Reviewers: svoboda, j.myers
 ``` c
 #include <time.h>
 
-void func(struct tm *time_tm) {
+void func(struct tm *time_tm)
+{
   char *time = asctime(time_tm);  // Undefined Behavior
   // ...
 }
@@ -3575,8 +3736,8 @@ Reviewers: svoboda, j.myers
 #include <stdio.h>
 
 wchar_t input[20] = L"foo bar baz";
-wchar_t* buffer;
-wchar_t* token = wcstok(input, L" ", &buffer);
+wchar_t *buffer;
+wchar_t *token = wcstok(input, L" ", &buffer);
 while (token) {
   wprintf(L"%ls\n", token);
   wcscpy(buffer, input);             // buffer changed
@@ -3592,7 +3753,8 @@ Reviewers: svoboda, j.myers
 #include <string.h>
 #include <wchar.h>
 
-void func(const char *mbs) {
+void func(const char *mbs)
+{
   size_t len;
   mbstate_t state;
   len = mbrlen(mbs, strlen(mbs), &state);  // Undefined Behavior
@@ -3608,7 +3770,8 @@ Reviewers: svoboda
 ``` c
 #include <wctype.h>
 
-int main(void) {
+int main(void)
+{
   int flag = iswalpha(WINT_MIN);
   // Undefined Behavior if sizeof(wchar_t) < sizeof(wint_t)
 ```
@@ -3623,7 +3786,8 @@ See UB 191 for background on LC\_CTYPE categories. (editor; UB 191 of which vers
 #include <wchar.h>
 #include <locale.h>
 
-int f(wint_t wc) {
+int f(wint_t wc)
+{
   wctype_t alpha = wctype("alpha");
   setlocale(LC_CTYPE, "C");     // state changed
   return iswctype(wc, alpha);   // Undefined Behavior
@@ -3639,7 +3803,8 @@ Reviewers: svoboda, j.myers
 #include <wctype.h>
 #include <locale.h>
 
-wint_t f(wint_t wc) {
+wint_t f(wint_t wc)
+{
   wctype_t lower = wctrans("tolower");
   setlocale(LC_CTYPE, "C");     // state changed
   return towctrans(wc, lower);  // Undefined Behavior
