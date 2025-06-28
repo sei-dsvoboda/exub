@@ -64,6 +64,9 @@ null pointer constant, use of undefined macro IOFBF and a redundant check for
 buf == NULL. Substituted a read of the buffer for a write, because that seems
 like a more straightforward example of using the contents of the array.
 
+Fixed example 104. The example comprised function definitions rather than
+declarations, and both had external linkage.
+
 ## Development Rules
 
 Here are some rules that the examples should comply with:
