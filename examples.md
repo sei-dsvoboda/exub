@@ -348,7 +348,7 @@ void f(int x) {
   printf("x is %d\n", x);
 }
 
-void* p = (void*) f;
+void *p = (void *) f;
 int (*g)(int) = p;
 int y = g(123);   // Undefined Behavior
 printf("y is %d\n", y);
@@ -446,7 +446,7 @@ Reviewers: svoboda
 
 ``` c
 // In bash/bashline.h:
-extern char* bash_groupname_completion_function(const char *, int);
+extern char *bash_groupname_completion_function(const char *, int);
 // Undefined Behavior, the identifier exceeds 31 characters
 
 
@@ -580,7 +580,7 @@ Reviewers: uecker, svoboda, j.myers
 ### 39\. The operand of the unary \* operator has an invalid value (6.5.4.2).
 
 ``` c
-char* p = NULL;
+char *p = NULL;
 *p;   // Undefined Behavior
 ```
 
@@ -778,8 +778,8 @@ Reviewers: uecker, svoboda, j.myers
 ``` c
 const size_t limit = sizeof(int) + 1;
 char bytes[limit];
-int *p1 = (int*) &(bytes[0]);
-int *p2 = (int*) &(bytes[1]); // overlaps with p1 (unless sizeof(int) == 1)
+int *p1 = (int *) &(bytes[0]);
+int *p2 = (int *) &(bytes[1]); // overlaps with p1 (unless sizeof(int) == 1)
 *p1 = 123;
 *p2 = *p1;                    // Undefined Behavior
 ```
@@ -811,7 +811,9 @@ Reviewers: svoboda
 EXTENDED COMPILABLE EXAMPLE: Consider a platform that allows function calls to be used in constant integer expressions.
 
 ``` c
-int square(int x) {return x*x;}
+int square(int x) {
+  return x*x;
+}
 
 enum people {
   Tom=1,
@@ -948,7 +950,7 @@ void func(void) {
   printf("i = %d.\n", i);
 
   ipp = &ip;          // Undefined Behavior
-  ipp = (int**) &ip;  // Undefined Behavior
+  ipp = (int **) &ip; // Undefined Behavior
   *ipp = &i;          // Valid
   if (*ip != 0) {     // Valid
     // ...
@@ -1141,10 +1143,15 @@ Reviewers: svoboda
 ### 76\. In a context requiring two function types to be compatible, they do not have compatible return types, or their parameters disagree in use of the ellipsis terminator or the number and type of parameters (after default argument promotion, when there is no parameter type list) (6.7.7.4).
 
 ``` c
-void fi(int* a) { (*a)++;}
-void fl(long* a) { (*a)++;}
+void fi(int *a) {
+  (*a)++;
+}
 
-int repeat(void f(), int* a) {
+void fl(long *a) {
+  (*a)++;
+}
+
+int repeat(void f(), int *a) {
   f(a);
   f(a);
   f(a);
@@ -1367,7 +1374,7 @@ Reviewers: svoboda
 
 ``` c
 #define s(x) #x
-char* x = "s(\)";  // Ill-formed, lone single quote
+char *x = "s(\)";  // Ill-formed, lone single quote
 ```
 
 HYPOTHETICAL COMPILABLE EXAMPLE?
@@ -1780,7 +1787,7 @@ Reviewers: svoboda
 ``` c
 #include <setjmp.h>
 
-int setjmp(char* foo);  // Undefined Behavior
+int setjmp(char *foo);  // Undefined Behavior
 ```
 
 Reviewers: svoboda, j.myers
@@ -2201,7 +2208,9 @@ Reviewers: svoboda, j.myers
 // Undefined Behavior
 #undef va_arg
 
-int va_arg(void) {return 123;}
+int va_arg(void) {
+  return 123;
+}
 ```
 
 Reviewers: svoboda
@@ -2264,12 +2273,12 @@ int main(void) {
   my_printf("My data", x, y);
 }
 
-void my_printf(const char* prefix, ...) {
+void my_printf(const char *prefix, ...) {
   va_list args;
   int *x;
   int *y;
   va_start( args, prefix);
-  x = va_arg( args, int*);      // Valid
+  x = va_arg( args, int *);     // Valid
   y = va_arg( args, void());    // Undefined Behavior
   va_end( args);
   printf("%s: [%d, %d], [%d, %d]\n", prefix, x[0], x[1], y[0], y[1]);
@@ -2280,7 +2289,7 @@ HYPOTHETICAL COMPILABLE EXAMPLE? (ideally one that replaces a with a function po
 
 Reviewers: svoboda, UBSG
 
-### 142\. Using a null pointer constant in form of an integer expression as an argument to a ... function and then interpreting it as a void\* or char\* (7.16.1.1).
+### 142\. Using a null pointer constant in form of an integer expression as an argument to a ... function and then interpreting it as a void \* or char \* (7.16.1.1).
 
 ``` c
 #include <stdarg.h>
@@ -2400,7 +2409,7 @@ Reviewers: svoboda
 
 ``` c
 int i = 1;
-int* pi = &i;
+int *pi = &i;
 nullptr_t n = nullptr;
 memcpy(&n, pi, sizeof(n));
 pi = n; // Undefined Behavior
@@ -2438,7 +2447,7 @@ Reviewers: svoboda
 #include <wchar.h>
 
 int main(void) {
-  FILE* in = fopen("foo.txt", "r");
+  FILE *in = fopen("foo.txt", "r");
 
   wchar_t wide_line[80];
   fgetws(wide_line, sizeof(wchar_t) * sizeof(wide_line), in);
@@ -2487,7 +2496,7 @@ Reviewers: svoboda
 ``` c
 #include <stdio.h>
 
-FILE* f = fopen("foo", "r");
+FILE *f = fopen("foo", "r");
 fflush(f);  // Undefined Behavior
 ```
 
@@ -2498,7 +2507,7 @@ Reviewers: svoboda, j.myers
 ``` c
 #include <stdio.h>
 
-FILE* f = fopen("foo", "read");  // Undefined Behavior
+FILE *f = fopen("foo", "read");  // Undefined Behavior
 ```
 
 Reviewers: svoboda, j.myers
@@ -2606,7 +2615,7 @@ Reviewers: svoboda, j.myers
 ``` c
 #include <stdio.h>
 
-void f(char* s) {
+void f(char *s) {
   printf("%0s", s);  // Undefined Behavior
 }
 ```
@@ -2618,7 +2627,7 @@ Reviewers: svoboda, j.myers
 ``` c
 #include <stdio.h>
 
-void f(int* pi) {
+void f(int *pi) {
   printf("%lp", pi);  // 'l' not defined for %p
 }
 ```
@@ -2641,7 +2650,7 @@ Reviewers: svoboda
 ``` c
 #include <stdio.h>
 
-void f(int* pi) {
+void f(int *pi) {
   printf("%-n", pi);  // Undefined Behavior
 }
 ```
@@ -2758,7 +2767,7 @@ Reviewers: svoboda, j.myers
 #include <stdio.h>
 
 char addr[] = "0x12345678"; // not produced by this code
-void* ptr;
+void *ptr;
 sscanf( addr, "%p", &ptr);  // Undefined Behavior
 ```
 
@@ -2785,7 +2794,7 @@ Reviewers: svoboda, j.myers
 ``` c
 const int buf_size = 100;
 char buf[buf_size];
-FILE* f = fopen("foo", "r");
+FILE *f = fopen("foo", "r");
 if (f == NULL) {
   printf("Can't open foo\n");
 }
@@ -2800,7 +2809,7 @@ Reviewers: svoboda
 ``` c
 const int buf_size = -1;      // Oops, should be > 0!
 char buf[buf_size];
-FILE* f = fopen("foo", "r");
+FILE *f = fopen("foo", "r");
 if (f == NULL) {
   printf("Can't open foo\n");
 }
@@ -2812,7 +2821,7 @@ Reviewers: svoboda
 ### 177\. The file position indicator for a binary stream is used after a call to the ungetc function where its value was zero before the call (7.23.7.10).
 
 ``` c
-FILE* f = fopen("foo", "rb");
+FILE *f = fopen("foo", "rb");
 if (f == NULL) {
   printf("Can't open foo\n");
 }
@@ -2826,7 +2835,7 @@ Reviewers: svoboda
 ### 178\. The file position indicator for a stream is used after an error occurred during a call to the fread or fwrite function (7.23.8.1, 7.23.8.2).
 
 ``` c
-FILE* f = fopen("foo", "rb");
+FILE *f = fopen("foo", "rb");
 if (f == NULL) {
   printf("Can't open foo\n");
 }
@@ -2845,7 +2854,7 @@ Reviewers: svoboda
 ### 179\. A partial element read by a call to the fread function is used (7.23.8.1).
 
 ``` c
-FILE* f = fopen("foo", "rb");
+FILE *f = fopen("foo", "rb");
 if (f == NULL) {
   printf("Can't open foo\n");
 }
@@ -2867,7 +2876,7 @@ Reviewers: svoboda
 ### 180\. The fseek function is called for a text stream with a nonzero offset and either the offset was not returned by a previous successful call to the ftell function on a stream associated with the same file or whence is not SEEK\_SET (7.23.9.2).
 
 ``` c
-FILE* f = fopen("foo", "r");
+FILE *f = fopen("foo", "r");
 if (f == NULL) {
   printf("Can't open foo\n");
 }
@@ -3167,13 +3176,13 @@ Reviewers: coates, svoboda
 
 ``` c
 int compare(const void *a, const void *b) {
-  return *(int*)a - *(int*)b;
+  return *(int *)a - *(int *)b;
 }
 
 int arr[] = {2, 3, 5, 11, 7}; // Oops, mis-ordered array!
 int n = sizeof(arr)/sizeof(arr[0]);
 int key = 7;
-int *result = (int*)bsearch(&key, arr, n, sizeof(int), compare);
+int *result = (int *)bsearch(&key, arr, n, sizeof(int), compare);
 // Undefined Behavior
 ```
 
@@ -3227,7 +3236,7 @@ Reviewers: svoboda
 ``` c
 #include <string.h>
 
-char* c = 0;
+char *c = 0;
 int length = strlen(c); // Undefined Behavior
 ```
 
@@ -3250,7 +3259,7 @@ Reviewers: svoboda
 #include <string.h>
 #include <threads.h>
 
-int bar(void*) {
+int bar(void *) {
   char *t = strtok(NULL, "#,"); // Undefined Behavior
   return t[0];
 }
@@ -3291,8 +3300,8 @@ Reviewers: svoboda, j.myers
 #include <stdio.h>
 #include <errno.h>
 
-char* inval = strerror(EINVAL);
-char* perm = strerror(EPERM);
+char *inval = strerror(EINVAL);
+char *perm = strerror(EPERM);
 printf("Invalid: %s\n", inval); // Undefined Behavior, invalidated by perm
 printf("Permission: %s\n", perm);
 ```
@@ -3461,14 +3470,14 @@ Reviewers: svoboda
 ``` c
 #include <threads.h>
 
-void destructor(void* arg) {
+void destructor(void *arg) {
   tss_t key;
   if (thrd_success != tss_create(&key, 0)) { // Undefined Behavior
     // Handle Error
   }
 }
 
-int func(void*) {
+int func(void *) {
   tss_t key;
   if (thrd_success != tss_create(&key, destructor)) {
     // Handle Error
@@ -3478,7 +3487,7 @@ int func(void*) {
   return 0;
 }
 
-int foo(void*) {
+int foo(void *) {
   thrd_t thr;
   if (thrd_success != thrd_create(&thr, func, 0)) {
     // Handle Error
@@ -3499,21 +3508,21 @@ Reviewers: svoboda, j.myers
 ``` c
 #include <threads.h>
 
-void destructor(void* arg) {
+void destructor(void *arg) {
   tss_t key;
   if (thrd_success != tss_create(&key, 0)) { // Undefined Behavior
     // Handle Error
   }
 }
 
-int func(void*) {
+int func(void *) {
   tss_t key;
   static char str[] = "Hello";
   tss_set(key, str); // Undefined Behavior, key not initialized by tss_create()
   return 0;
 }
 
-int foo(void*) {
+int foo(void *) {
   thrd_t thr;
   if (thrd_success != thrd_create(&thr, func, 0)) {
     // Handle Error
@@ -3536,14 +3545,14 @@ Reviewers: svoboda, j.myers
 #include <threads.h>
 #include <time.h>
 
-char* now = 0;
+char *now = 0;
 
-int bar(void*) {
+int bar(void *) {
   time_t n1;
   if ((time_t) -1 == time(&n1)) {
     // Handle Error
   }
-  struct tm* n2 = localtime(&n1);
+  struct tm *n2 = localtime(&n1);
   now = asctime(n2);
   return 0;
 }
@@ -3602,8 +3611,8 @@ Reviewers: svoboda, j.myers
 #include <stdio.h>
 
 wchar_t input[20] = L"foo bar baz";
-wchar_t* buffer;
-wchar_t* token = wcstok(input, L" ", &buffer);
+wchar_t *buffer;
+wchar_t *token = wcstok(input, L" ", &buffer);
 while (token) {
   wprintf(L"%ls\n", token);
   wcscpy(buffer, input);             // buffer changed
