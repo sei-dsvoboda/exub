@@ -58,6 +58,8 @@ declarations, and both had external linkage.
 
 Stop using 0 as a null pointer constant, for clarity.
 
+Clarify the rules for reserved identifiers in example 105.
+
 ## Development Rules
 
 Here are some rules that the examples should comply with:
