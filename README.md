@@ -56,6 +56,8 @@ New examples.c18.md for UBs from C18 that no longer exist in C23.
 Fixed example 104. The example comprised function definitions rather than
 declarations, and both had external linkage.
 
+Stop using 0 as a null pointer constant, for clarity.
+
 ## Development Rules
 
 Here are some rules that the examples should comply with:
