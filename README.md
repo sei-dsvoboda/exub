@@ -71,6 +71,8 @@ Modified use of whitespace in examples. Asterisks are placed such that they
 accurately reflect the grammar of the language (in which * is part of a
 declarator, not part of the declaration-specifiers).
 
+Removed redundant casts of the result of malloc and realloc.
+
 ## Development Rules
 
 Here are some rules that the examples should comply with:
