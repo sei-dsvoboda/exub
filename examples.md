@@ -225,7 +225,7 @@ Reviewers: svoboda
 ``` c
 void f(size_t n)
 {
-  int *a = (int *)malloc(n * sizeof(int));
+  int *a = malloc(n * sizeof(int));
   if (a != NULL) {
     for (size_t i = 0; i != n; ++i) {
       a[i] = a[i] ^ a[i]; // Undefined Behavior
@@ -684,7 +684,7 @@ Reviewers: svoboda
 #define MAX_MACHINE_NAME_LENGTH 64
 char *get_machine_name(const char *path)
 {
-  char *machine_name = (char *)malloc(MAX_MACHINE_NAME_LENGTH + 1);
+  char *machine_name = malloc(MAX_MACHINE_NAME_LENGTH + 1);
   if (machine_name == NULL) {
     return NULL;
   }
@@ -933,7 +933,7 @@ const char *find(const struct S *s, int c)
 
 void g(void)
 {
-  struct S *s = (struct S *)malloc(sizeof(struct S));
+  struct S *s = malloc(sizeof(struct S));
   if (s == NULL) {
     // Handle Error
   }
@@ -1594,7 +1594,7 @@ Reviewers: svoboda, j.myers
 ``` c
 void f1(size_t nchars)
 {
-  char *p = (char *)malloc(nchars);
+  char *p = malloc(nchars);
   const size_t n = nchars + 1;
   if (p) {
     memset(p, 0, n); // Undefined Behavior, 1-byte buffer overflow
@@ -2061,7 +2061,7 @@ int main(void)
 {
   signal(SIGINT, handler);
 
-  err_msg = (char *)malloc(MAX_MSG_SIZE);
+  err_msg = malloc(MAX_MSG_SIZE);
   if (err_msg == NULL) {
     /// Handle Error
   }
@@ -3011,7 +3011,7 @@ Reviewers: svoboda
 #include <assert.h>
 
 size_t size = 0;
-int _array = (int_) malloc(size * sizeof(int));
+int *array = malloc(size * sizeof(int));
 assert(array);
 array[0] = 123;  // Undefined Behavior, out-of-bounds write
 ```
@@ -3041,7 +3041,7 @@ Reviewers: svoboda
 void f(size_t num_elem)
 {
   int error_condition = 0;
-  int *x = (int *)malloc(num_elem * sizeof(int));
+  int *x = malloc(num_elem * sizeof(int));
   if (x == NULL) {
     // ...
   }
@@ -3089,7 +3089,7 @@ int *resize_array(int *array, size_t count)
     return 0;
   }
 
-  int *ret = (int *)realloc(array, count * sizeof(int));
+  int *ret = realloc(array, count * sizeof(int));
   if (!ret) {
     free(array);
     return 0;
@@ -3100,7 +3100,7 @@ int *resize_array(int *array, size_t count)
 
 void func(void)
 {
-  int *array = (int *)malloc(OLD_SIZE * sizeof(int));
+  int *array = malloc(OLD_SIZE * sizeof(int));
   if (0 == array) {
     // Handle Error
   }

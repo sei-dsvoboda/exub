@@ -67,6 +67,9 @@ like a more straightforward example of using the contents of the array.
 Fixed example 104. The example comprised function definitions rather than
 declarations, and both had external linkage.
 
+Removed redundant casts of the result of malloc and realloc.
+Fixed another instance of misuse of _ in place of *.
+
 ## Development Rules
 
 Here are some rules that the examples should comply with:
