@@ -67,6 +67,10 @@ like a more straightforward example of using the contents of the array.
 
 Fixed another instance of misuse of _ in place of *.
 
+Modified use of whitespace in examples. Asterisks are placed such that they
+accurately reflect the grammar of the language (in which * is part of a
+declarator, not part of the declaration-specifiers).
+
 ## Development Rules
 
 Here are some rules that the examples should comply with:
