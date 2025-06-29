@@ -65,6 +65,8 @@ null pointer constant, use of undefined macro IOFBF and a redundant check for
 buf == NULL. Substituted a read of the buffer for a write, because that seems
 like a more straightforward example of using the contents of the array.
 
+Fixed another instance of misuse of _ in place of *.
+
 ## Development Rules
 
 Here are some rules that the examples should comply with:
