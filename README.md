@@ -60,6 +60,11 @@ Stop using 0 as a null pointer constant, for clarity.
 
 Clarify the rules for reserved identifiers in example 105.
 
+Fixed errors and style of example 157: _file instead of *file, use of 0 as a
+null pointer constant, use of undefined macro IOFBF and a redundant check for
+buf == NULL. Substituted a read of the buffer for a write, because that seems
+like a more straightforward example of using the contents of the array.
+
 ## Development Rules
 
 Here are some rules that the examples should comply with:
