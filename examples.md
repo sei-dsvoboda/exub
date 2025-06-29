@@ -591,11 +591,11 @@ Reviewers: svoboda, j.myers
 ``` c
 struct f { struct f *x; } *p;
 void g(void) {
-  (struct f)p;
+  (struct f)p;   // Undefined Behavior
 }
 ```
 
-Note: Removed from J.2. by [N3244](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3244.pdf)
+Reviewers: svoboda
 
 ### 41\. The value of the second operand of the / or % operator is zero (6.5.6).
 
@@ -849,9 +849,17 @@ Reviewers: svoboda
 
 ### 56\. An identifier for an object is declared with no linkage and the type of the object is incomplete after its declarator, or after its init-declarator if it has an initializer (6.7).
 
+TODO
+
+Reviewers:
+
 Note: Removed from J.2. by [N3244](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3244.pdf)
 
 ### 57\. A function is declared at block scope with an explicit storage-class specifier other than extern (6.7.2).
+
+TODO
+
+Reviewers:
 
 Note: Removed from J.2. by [N3244](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3244.pdf)
 
@@ -902,6 +910,10 @@ Cite: CERT C Rule ARR30-C 5th NCCE 7.1.10
 Reviewers: svoboda
 
 ### 60\. When the complete type is needed, an incomplete structure or union type is not completed in the same scope by another declaration of the tag that defines the content (6.7.3.4).
+
+TODO
+
+Reviewers:
 
 Note: Removed from J.2. by [N3244](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3244.pdf)
 
@@ -956,8 +968,6 @@ const fun_t f;  // Undefined Behavior
 ```
 
 Reviewers: uecker, svoboda, j.myers
-
-Note: Removed from J.2. by [N3242](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3242.PDF)
 
 ### 64\. Two qualified types that are required to be compatible do not have the identically qualified version of a compatible type (6.7.4).
 
@@ -1025,8 +1035,6 @@ extern inline int foo(int x);  // Undefined Behavior
 
 Reviewers: svoboda, j.myers
 
-Note: Removed from J.2. by [N3244](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3244.pdf)
-
 ### 68\. A function declared with a \_Noreturn function specifier returns to its caller (6.7.5).
 
 ``` c
@@ -1040,6 +1048,10 @@ _Noreturn void f(void) {
 Reviewers: uecker, svoboda, j.myers
 
 ### 69\. The definition of an object has an alignment specifier and another declaration of that object has a different alignment specifier (6.7.6).
+
+TODO
+
+Reviewers:
 
 Note: Removed from J.2. by [N3244](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3244.pdf)
 
@@ -1124,8 +1136,6 @@ void f(const void);
 void g(register void);  // Undefined Behavior
 ```
 
-Note: Removed from J.2. by [N3244](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3244.pdf)
-
 Reviewers: svoboda
 
 ### 76\. In a context requiring two function types to be compatible, they do not have compatible return types, or their parameters disagree in use of the ellipsis terminator or the number and type of parameters (after default argument promotion, when there is no parameter type list) (6.7.7.4).
@@ -1171,13 +1181,25 @@ Reviewers: svoboda
 
 ### 79\. The value of an unnamed member of a structure or union is used (6.7.11).
 
+TODO
+
+Reviewers:
+
 Note: Removed from J.2. by [N3245](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3345.pdf)
 
 ### 80\. The initializer for a scalar is neither a single expression, an empty initializer, nor a single expression enclosed in braces (6.7.11).
 
+TODO
+
+Reviewers:
+
 Note: Removed from J.2. by [N3246](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3346.pdf)
 
 ### 81\. The initializer for a structure or union object is neither an initializer list nor a single expression that has compatible structure or union type (6.7.11).
+
+TODO
+
+Reviewers:
 
 Note: Removed from J.2. by [N3246](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3346.pdf)
 
@@ -1264,6 +1286,10 @@ Cite: CERT C Rule MSC37-C 1st NCCE 15.4.1, 2nd NCCE 15.4.3, 3rd NCCE 15.4.3.1
 Reviewers: svoboda
 
 ### 87\. An identifier for an object with internal linkage and an incomplete type is declared with a tentative definition (6.9.3).
+
+TODO
+
+Reviewers:
 
 Note: Removed from J.2. by [N3347](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3347.pdf)
 
@@ -2433,6 +2459,10 @@ int main(void) {
 Reviewers: svoboda, j.myers
 
 ### 152\. Use is made of any portion of a file beyond the most recent wide character written to a wide-oriented stream (7.23.2).
+
+TODO
+
+Reviewers:
 
 Note: Removed from J.2. by [N3064](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3064.pdf)
 
