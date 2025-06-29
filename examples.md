@@ -2536,13 +2536,13 @@ Reviewers: svoboda
 
 #define SIZE 1024
 char buf[SIZE];
-FILE _file = fopen("foo", "r");
-if (file == 0 ||
-    setvbuf(file, buf, buf ? IOFBF : IONBF, SIZE) != 0) {
+FILE *file = fopen("foo", "r");
+if (file == NULL ||
+    setvbuf(file, buf, _IOFBF, SIZE) != 0) {
   // Handle Error
 }
 // ...
-buf[0] = '\0';  // Undefined Behavior
+putchar(buf[0]);  // Undefined Behavior
 ```
 
 Reviewers: svoboda, j.myers
