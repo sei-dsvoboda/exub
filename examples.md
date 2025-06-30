@@ -1513,7 +1513,7 @@ static void *malloc(size_t nbytes); // Undefined Behavior
 
 Cite: CERT C Rule DCL37-C 4th NCCE 3.4.7
 
-Reviewers: svoboda
+Reviewers: svoboda, chrisbazley
 
 ### 105\. The program declares or defines a reserved identifier, other than as allowed by 7.1.4 (7.1.3).
 
@@ -1534,7 +1534,7 @@ unsigned int getValue(unsigned int __count) { // Undefined Behavior
 
 Cite: TS17961 5.44 \[resident\] EXAMPLE 1, 2, 4, 6, 8
 
-Reviewers: svoboda
+Reviewers: svoboda, chrisbazley
 
 ### 106\. The program removes the definition of a macro whose name begins with an underscore and either an uppercase letter or another underscore (7.1.3).
 
@@ -2554,7 +2554,7 @@ if (file == NULL ||
 putchar(buf[0]);  // Undefined Behavior
 ```
 
-Reviewers: svoboda, j.myers
+Reviewers: svoboda, j.myers, chrisbazley
 
 ### 158\. There are insufficient arguments for the format in a call to one of the formatted input/output functions, or an argument does not have an appropriate type (7.23.6.1, 7.23.6.2, 7.31.2.1, 7.31.2.2).
 
