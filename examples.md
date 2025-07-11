@@ -302,9 +302,23 @@ Reviewers: svoboda
 
 ### 18\. An lvalue does not designate an object when evaluated (6.3.2.1).
 
-TODO
+``` c
+void func() {
+  int *p;
+  {
+    int i = 1;
+    p = &i;
+    *p = 2;  // ok
+  }
+  *p = 3;    // Undefined Behavior
 
-Reviewers:
+  int a[10];
+  a[1] = 4;  // ok
+  a[10] = 5; // Undefined Behavavior
+}
+```
+
+Reviewers: svoboda, UBSG
 
 ### 19\. A non-array lvalue with an incomplete type is used in a context that requires the value of the designated object (6.3.2.1).
 
@@ -427,6 +441,7 @@ Reviewers: svoboda
 EXTENDED COMPILABLE EXAMPLE: Consider a platform that allows the division sign `÷` to be used as identifiers:
 
 ``` c
+// In UTF-8: the division sign == '÷' == U+00F7
 double ONE\u00F7TWO = 0.5;  // ONE ÷ TWO, Undefined Behavior
 ```
 
