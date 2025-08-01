@@ -1,8 +1,35 @@
 # Examples of Undefined Behavior for Annex J.2 in C23
 
-For details about how to complete development of this document, see the [README](./README.md).
+For each undefined behavior, this document provides an example of code that demonstrates this undefined behavior.
 
-## Normative Text
+For r r most undefined behaviors, the example code strictly conforms to the Standard, except for the single undefined behavior. These code examples build executable code, although popular compilers may issue a warning.
+
+However, there are several undefined behaviors (#6 for one) for which we were unable to generate a code example that produces executable code using current compilers.  For these, we imagined that a compiler was extended to support an additional feature of the C language, and we then wrote the code for this hypothetical compiler.  These examples each are prefaced with "EXTENDED COMPILABLE EXAMPLE".
+
+## Format
+
+The format of this document is is:
+
+ * Undefined Behavior Number
+ * Undefined Behavior Definition (taken from Annex J.2)
+ * Example(s)
+
+## Legal Issues
+
+This material is currently covered by a CC-BY license.
+
+### Bibliography
+
+Many code examples were provided by the following sources:
+
+ * TS 17961: [ISO/IEC TS 17961](http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1761.pdf). _Information Technology—Programming Languages, Their Environments and System Software Interfaces—C Secure Coding Rules._ Geneva, Switzerland: ISO, 2012.
+ * [CERT C Rule](https://resources.sei.cmu.edu/library/asset-view.cfm?assetID=454220)
+   This is the published 2016 snapshot of [SEI CERT C Rule](https://wiki.sei.cmu.edu/confluence/display/c/2+Rules).
+   The CERT code examples are reproduced with permission of the owner.
+ * [CERT C Recommendations](https://wiki.sei.cmu.edu/confluence/display/c/3+Recommendations)
+    The CERT code examples are reproduced with permission of the owner.
+
+## Examples
 
 ### 1\. A "shall" or "shall not" requirement that appears outside of a constraint is violated (Clause 4).
 
@@ -1387,23 +1414,23 @@ Reviewers: svoboda
 
 ### 93\. The result of the preprocessing operator # is not a valid character string literal (6.10.5.2).
 
+HYPOTHETICAL COMPILABLE EXAMPLE?
+
 ``` c
 #define s(x) #x
 char *x = "s(\)";  // Ill-formed, lone single quote
 ```
 
-HYPOTHETICAL COMPILABLE EXAMPLE?
-
 Reviewers: svoboda, UBSG
 
 ### 94\. The result of the preprocessing operator ## is not a valid preprocessing token (6.10.5.3).
+
+HYPOTHETICAL COMPILABLE EXAMPLE?
 
 ``` c
 #define my_join(a, b) a ## b
 char q[] = my_join(!, !);   // Ill-formed
 ```
-
-HYPOTHETICAL COMPILABLE EXAMPLE?
 
 Reviewers: svoboda
 
@@ -2278,6 +2305,8 @@ Reviewers: svoboda
 
 ### 141\. The type parameter to the va\_arg macro does not name an object type (7.16.1.1).
 
+HYPOTHETICAL COMPILABLE EXAMPLE? (ideally one that replaces a with a function pointer example)
+
 ``` c
 #include <stdio.h>
 #include <stdarg.h>
@@ -2299,8 +2328,6 @@ void my_printf(const char *prefix, ...) {
   printf("%s: [%d, %d], [%d, %d]\n", prefix, x[0], x[1], y[0], y[1]);
 }
 ```
-
-HYPOTHETICAL COMPILABLE EXAMPLE? (ideally one that replaces a with a function pointer example)
 
 Reviewers: svoboda, UBSG
 
@@ -2386,6 +2413,8 @@ Reviewers: svoboda
 
 ### 146\. The type parameter of an offsetof macro defines a new type (7.21).
 
+HYPOTHETICAL COMPILABLE EXAMPLE?
+
 ``` c
 int plus(int a, int b) {
   return a+b;
@@ -2401,8 +2430,6 @@ typedef struct st {
 
 size_t z = offsetof( int (*)(int, int), num2);  // Undefined Behavior
 ```
-
-HYPOTHETICAL COMPILABLE EXAMPLE?
 
 NOTE: j.myers says:
 
@@ -3147,11 +3174,11 @@ Reviewers: svoboda
 
 ### 191\. A command is executed through the system function in a way that is documented as causing termination or some other form of undefined behavior (7.24.4.8).
 
+HYPOTHETICAL COMPILABLE EXAMPLE?
+
 ``` c
 int retval = system("ls /missing");   // Undefined Behavior
 ```
-
-HYPOTHETICAL COMPILABLE EXAMPLE?
 
 Reviewers: svoboda
 

@@ -16,6 +16,22 @@ This document was created in late 2021 in the Undefined Behavior Study Group (UB
 
 It was first presented to WG14 in the Fall 2024 meeting in Minneapolis.
 
+### August 2025 commit & notes
+
+Brief introduction
+
+### June 2025 commit & notes
+
+UBSG Review, several coding improvements made by Chris Bazley
+
+### May 2025 commit & notes
+
+All examples added from references to CERT C or TS 17961.
+
+### March 2025 commit & notes
+
+Document moved to github, placed under a CC-BY license.
+
 ### December 2023 commit & notes
 
 New UB code examples (without notes): 13, 22, 70, 71, 74, 76-78, 83, 84, 88, 89, 91, 95, 97, 98, 101, 102, 114, 116-118, 122, 123, 145, 147, 150, 175-180, 190, 194, 198, 202, 204
