@@ -211,7 +211,7 @@ Reviewers: svoboda
 
 ``` c
 void f(size_t n) {
-  int *a = (int *)malloc(n * sizeof(int));
+  int *a = malloc(n * sizeof(int));
   if (a != NULL) {
     for (size_t i = 0; i != n; ++i) {
       a[i] = a[i] ^ a[i]; // Undefined Behavior
@@ -424,7 +424,7 @@ char s[] = "foo
 bar";   // Undefined Behavior
 ```
 
-Reviewers: svoboda
+Reviewers: svoboda, UBSG
 
 ### 27\. A reserved keyword token is used in translation phase 7 or 8 (5.1.1.2) for some purpose other than as a keyword (6.4.1).
 
@@ -434,7 +434,7 @@ EXTENDED COMPILABLE EXAMPLE: Consider a platform that allows keywords to be used
 int if = 3;  // Undefined Behavior
 ```
 
-Reviewers: svoboda
+Reviewers: svoboda, UBSG
 
 ### 28\. A universal character name in an identifier does not designate a character whose encoding falls into one of the specified ranges (6.4.2.1).
 
@@ -445,7 +445,7 @@ EXTENDED COMPILABLE EXAMPLE: Consider a platform that allows the division sign `
 double ONE\u00F7TWO = 0.5;  // ONE ÷ TWO, Undefined Behavior
 ```
 
-Reviewers: svoboda
+Reviewers: svoboda, UBSG
 
 ### 29\. The initial character of an identifier is a universal character name designating a digit (6.4.2.1).
 
@@ -455,7 +455,7 @@ EXTENDED COMPILABLE EXAMPLE: Consider a platform that accepts universal characte
 int \u0031N = 1;  // "1N", Undefined Behavior
 ```
 
-Reviewers: svoboda
+Reviewers: svoboda, UBSG
 
 ### 30\. Two identifiers differ only in nonsignificant characters (6.4.2.1).
 
@@ -663,7 +663,7 @@ Reviewers: svoboda
 ``` c
 #define MAX_MACHINE_NAME_LENGTH 64
 char *get_machine_name(const char *path) {
-  char *machine_name = (char *)malloc(MAX_MACHINE_NAME_LENGTH + 1);
+  char *machine_name = malloc(MAX_MACHINE_NAME_LENGTH + 1);
   if (machine_name == NULL) {
     return NULL;
   }
@@ -913,7 +913,7 @@ const char *find(const struct S *s, int c) {
 }
 
 void g(void) {
-  struct S *s = (struct S *)malloc(sizeof(struct S));
+  struct S *s = malloc(sizeof(struct S));
   if (s == NULL) {
     // Handle Error
   }
@@ -1394,7 +1394,7 @@ char *x = "s(\)";  // Ill-formed, lone single quote
 
 HYPOTHETICAL COMPILABLE EXAMPLE?
 
-Reviewers: svoboda
+Reviewers: svoboda, UBSG
 
 ### 94\. The result of the preprocessing operator ## is not a valid preprocessing token (6.10.5.3).
 
@@ -1574,7 +1574,7 @@ Reviewers: svoboda, j.myers
 
 ``` c
 void f1(size_t nchars) {
-  char *p = (char *)malloc(nchars);
+  char *p = malloc(nchars);
   const size_t n = nchars + 1;
   if (p) {
     memset(p, 0, n); // Undefined Behavior, 1-byte buffer overflow
@@ -2018,7 +2018,7 @@ void handler(int signum) {
 int main(void) {
   signal(SIGINT, handler);
 
-  err_msg = (char *)malloc(MAX_MSG_SIZE);
+  err_msg = malloc(MAX_MSG_SIZE);
   if (err_msg == NULL) {
     /// Handle Error
   }
@@ -2934,7 +2934,7 @@ Reviewers: svoboda
 #include <assert.h>
 
 size_t size = 0;
-int *array = (int *) malloc(size * sizeof(int));
+int *array = malloc(size * sizeof(int));
 assert(array);
 array[0] = 123;  // Undefined Behavior, out-of-bounds write
 ```
@@ -2962,7 +2962,7 @@ Reviewers: svoboda
 ``` c
 void f(size_t num_elem) {
   int error_condition = 0;
-  int *x = (int *)malloc(num_elem * sizeof(int));
+  int *x = malloc(num_elem * sizeof(int));
   if (x == NULL) {
     // ...
   }
@@ -3009,7 +3009,7 @@ int *resize_array(int *array, size_t count) {
     return 0;
   }
 
-  int *ret = (int *)realloc(array, count * sizeof(int));
+  int *ret = realloc(array, count * sizeof(int));
   if (!ret) {
     free(array);
     return 0;
@@ -3019,7 +3019,7 @@ int *resize_array(int *array, size_t count) {
 }
 
 void func(void) {
-  int *array = (int *)malloc(OLD_SIZE * sizeof(int));
+  int *array = malloc(OLD_SIZE * sizeof(int));
   if (NULL == array) {
     // Handle Error
   }
