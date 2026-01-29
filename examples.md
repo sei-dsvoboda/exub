@@ -2466,7 +2466,7 @@ Reviewers: svoboda
 
 ### 149\. The member-designator parameter of an offsetof macro is an invalid right operand of the . operator for the type parameter, or designates a bit-field (7.21).
 
-EXTENDED COMPILABLE EXAMPLE: Consider a platform that allows invalid member-designator parameteteters in offset macros:
+EXTENDED COMPILABLE EXAMPLE: Consider a platform that allows invalid member-designator parameters in offset macros:
 
 ``` c
 typedef struct st {
