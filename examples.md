@@ -1,4 +1,4 @@
-# N???? - Examples of Undefined Behavior for Annex J.2 in C23
+# Examples of Undefined Behavior for Annex J.2 in C23
 by David Svoboda <svoboda2sei.cmu.edu>
 
 The paper was created by the Undefined Behavior Study Group, in hopes of publication.  We would therefore request a vote to form an editorial group to adjust this paper for eventual publication as a white paper.
@@ -1371,18 +1371,14 @@ Reviewers: svoboda
 
 ### 90\. The #include preprocessing directive that results after expansion does not match one of the two header name forms (6.10.3).
 
-EXTENDED COMPILABLE EXAMPLE: Consider a platform that allows token concatenation in #include directives.
+EXTENDED COMPILABLE EXAMPLE: Consider a platform that allows prefix and suffix commands associated with the inclusion of a file.
 
 ``` c
-#define str(s) # s
-#define xstr(s) str(s)
-#define INCFILE(n) z ## n
-
-#include xstr(INCFILE(3).h
-// Undefined Behavior: #include "z3.h"
+#include "hui.h" prefix(define pro 25) suffix(undef pro)
+// Undefined Behavior
 ```
 
-Reviewers: svoboda
+Reviewers: svoboda, gustedt
 
 ### 91\. The character sequence in an #include preprocessing directive does not start with a letter (6.10.3).
 
