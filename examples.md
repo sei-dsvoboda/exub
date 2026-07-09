@@ -3588,21 +3588,20 @@ Reviewers: svoboda, j.myers
 #include <threads.h>
 #include <time.h>
 
-char *now = 0;
+struct tm *now = NULL;
 
-int bar(void *) {
+int how_soon_is_now(void *) {
   time_t n1;
   if ((time_t) -1 == time(&n1)) {
     // Handle Error
   }
-  struct tm *n2 = localtime(&n1);
-  now = asctime(n2);
+  now = localtime(&n1);
   return 0;
 }
 
-void foo(void) {
+int main(void) {
   thrd_t thr;
-  if (thrd_success != thrd_create(&thr, bar, 0)) {
+  if (thrd_success != thrd_create(&thr, how_soon_is_now, 0)) {
     // Handle Error
   }
 
@@ -3611,11 +3610,17 @@ void foo(void) {
     // Handle Error
   }
 
-  printf("The time is %s\n", now); // Undefined Behavior
+  char buf[1024];
+  puts("The time is: ");
+  if (strftime(buf, sizeof buf, "%Y-%m-%d %H:%M:%S %Z",
+               now) > 0) { // Undefined Behavior
+    puts(buf);
+  }
+  return 0;
 }
 ```
 
-Reviewers: svoboda, j.myers
+Reviewers: svoboda
 
 ### 215\. At least one member of the broken-down time passed to asctime contains a value outside its normal range, or the calculated year exceeds four digits or is less than the year 1000 (7.29.3.1).
 
