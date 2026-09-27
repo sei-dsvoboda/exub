@@ -215,22 +215,19 @@ Reviewers: svoboda
 ### 11\. The value of an object with automatic storage duration is used while the object has an indeterminate representation (6.2.4, 6.7.11, 6.8).
 
 ``` c
-void get_sign(int number, int *sign) {
-  if (sign == NULL) {
-    // ...
-  }
-  if (number > 0) {
-    *sign = 1;
-  } else if (number < 0) {
-    *sign = -1;
-  } // If number == 0, sign is not changed.
+int is_vowel(unsigned char c) {
+  return strchr("aeiouy", c) != NULL;
 }
 
-int is_negative(int number) {
-  int sign;
-  get_sign(number, &sign);
-  return (sign < 0);  // Undefined Behavior, sign might not be initialized
-}}
+int has_vowels(size_t max, unsigned char str[max]) {
+  unsigned char c;
+  for (size_t i = 0; i < max; i++) {
+    if (is_vowel(c)) { // oops, should use str[i]!
+      return 1;
+    }
+  }
+  return 0;
+}
 ```
 
 Cite: TS17961 5.35 \[uninitref\] EXAMPLE 1, 2,
@@ -835,6 +832,8 @@ Reviewers: coates, svoboda
 
 ### 52\. An expression that is required to be an integer constant expression does not have an integer type; has operands that are not integer constants, named constants, compound literal constants, enumeration constants, character constants, predefined constants, sizeof expressions whose results are integer constants, alignof expressions, or immediately-cast floating constants; or contains casts (outside operands to sizeof and alignof operators) other than conversions of arithmetic types to integer types (6.6).
 
+This UB has been eliminated by [N3558](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3558.htm).
+
 EXTENDED COMPILABLE EXAMPLE: Consider a platform that accepts floating-point constants to be used in constant integer expressions.
 
 ``` c
@@ -854,6 +853,8 @@ struct s {
 Reviewers: svoboda
 
 ### 53\. A constant expression in an initializer is not, or does not evaluate to, one of the following: a named constant, a compound literal constant, an arithmetic constant expression, a null pointer constant, an address constant, or an address constant for a complete object type plus or minus an integer constant expression (6.6).
+
+This UB has been eliminated by [N3558](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3558.htm).
 
 EXTENDED COMPILABLE EXAMPLE: Consider a platform that allows function calls to be used in constant integer expressions.
 
@@ -878,6 +879,8 @@ struct s {
 Reviewers: svoboda
 
 ### 54\. An arithmetic constant expression does not have arithmetic type; has operands that are not integer constants, floating constants, named and compound literal constants of arithmetic type, character constants, predefined constants, sizeof expressions whose results are integer constants, or alignof expressions; or contains casts (outside operands to sizeof or alignof operators) other than conversions of arithmetic types to arithmetic types (6.6).
+
+This UB has been eliminated by [N3558](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3558.htm).
 
 EXTENDED COMPILABLE EXAMPLE: Consider a platform that allows string literals to be used in constant arithmetic expressions.
 
@@ -1258,6 +1261,8 @@ Reviewers:
 Note: Removed from J.2. by [N3246](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3346.pdf)
 
 ### 82\. The initializer for an aggregate or union, other than an array initialized by a string literal, is not a brace-enclosed list of initializers for its elements or members (6.7.11).
+
+This UB has been eliminated by [N3346](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3346.pdf).
 
 EXTENDED COMPILABLE EXAMPLE: Consider a platform that allows integer literals to be used in aggregate initializer expressions.
 
