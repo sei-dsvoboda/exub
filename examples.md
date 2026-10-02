@@ -62,7 +62,7 @@ Reviewers: svoboda
 void func(void) {
   int \u0401;
   // ...
-  assign(\u04, 01, 4);   // Undefined Behavior
+  assign(\,u0401, 4);   // Undefined Behavior
   // ...
 }
 ```
@@ -264,7 +264,7 @@ union {
 } u;
 
 u.f = 3.14;
-u.i = 123;
+u.i++;                        // non-representation value for u.f arising from the side effect of the post increment
 printf("value is %f\n", u.f); // Undefined Behavior
 ```
 
@@ -432,11 +432,12 @@ Reviewers: svoboda
 ### 25\. A pointer is used to call a function whose type is not compatible with the referenced type (6.3.2.3).
 
 ``` c
-char *(*fp)();
+typedef char *(*fp_t)(void);
+fp_t fp;
 void f(void) {
   char *c;
-  fp = strchr;
-  c = fp(12, 2);  // Undefined Behavior, incorrect arguments
+  fp = (fp_t)strchr;  // from <string.h>
+  c = fp();     // Undefined Behavior, incorrect arguments
 }
 ```
 
@@ -481,7 +482,7 @@ Reviewers: svoboda, UBSG
 EXTENDED COMPILABLE EXAMPLE: Consider a platform that accepts universal character names that designate digits to be used as identifiers:
 
 ``` c
-int \u0031N = 1;  // "1N", Undefined Behavior
+int U+FF11N = 1;  // "１N", Undefined Behavior (U+FF11 is the full width (CJK) numeral 1 and does not have the XID_Start property.)
 ```
 
 Reviewers: svoboda, UBSG
