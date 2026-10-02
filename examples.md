@@ -69,7 +69,7 @@ void func(void) {
 
 Cite: CERT C Rule PRE30-C 1st NCCE 2.1.1
 
-Reviewers: svoboda
+Reviewers: svoboda, dave.banham
 
 ### 4\. A program in a hosted environment does not define a function named main using one of the specified forms (5.1.2.3.2).
 
@@ -109,7 +109,7 @@ bool get_flag(void) {
 
 Cite: CERT C Rule CON32-C 1st NCCE 14.3.1, CON40-C 1st NCCE 14.11.1
 
-Reviewers: svoboda
+Reviewers: svoboda, dave.banham
 
 ### 6\. A character not in the basic source character set is encountered in a source file, except in an identifier, a character constant, a string literal, a header name, a comment, or a preprocessing token that is never converted to a token (5.2.1).
 
@@ -268,7 +268,7 @@ u.i++;                        // non-representation value for u.f arising from t
 printf("value is %f\n", u.f); // Undefined Behavior
 ```
 
-Reviewers: svoboda
+Reviewers: svoboda, dave.banham
 
 ### 14\. Two declarations of the same object or function specify types that are not compatible (6.2.7).
 
@@ -397,7 +397,7 @@ int y = g(123);   // Undefined Behavior
 printf("y is %d\n", y);
 ```
 
-Reviewers: svoboda
+Reviewers: svoboda, dave.banham
 
 ### 23\. Conversion of a pointer to an integer type produces a value outside the range that can be represented (6.3.2.3).
 
@@ -443,7 +443,7 @@ void f(void) {
 
 Cite: TS17961 5.6 \[argcomp\] EXAMPLE 1
 
-Reviewers: svoboda
+Reviewers: svoboda, dave.banham
 
 ### 26\. An unmatched ' or " character is encountered on a logical source line during tokenization (6.4).
 
@@ -464,7 +464,7 @@ EXTENDED COMPILABLE EXAMPLE: Consider a platform that allows keywords to be used
 int if = 3;  // Undefined Behavior
 ```
 
-Reviewers: svoboda, UBSG
+Reviewers: svoboda, UBSG, dave.banham
 
 ### 28\. A universal character name in an identifier does not designate a character whose encoding falls into one of the specified ranges (6.4.2.1).
 
@@ -485,7 +485,7 @@ EXTENDED COMPILABLE EXAMPLE: Consider a platform that accepts universal characte
 int U+FF11N = 1;  // "１N", Undefined Behavior (U+FF11 is the full width (CJK) numeral 1 and does not have the XID_Start property.)
 ```
 
-Reviewers: svoboda, UBSG
+Reviewers: svoboda, UBSG, dave.banham
 
 ### 30\. Two identifiers differ only in nonsignificant characters (6.4.2.1).
 
