@@ -47,7 +47,7 @@ Reviewers: svoboda, UBSG
 ``` c
 // Undefined Behavior
 /* Comment with end comment marker unintentionally omitted
-security_critical_function();
+security_critical_function(void);
 ```
 
 Cite: CERT C Rec MSC04-C 1st NCCE
@@ -332,7 +332,7 @@ Reviewers: svoboda
 ### 18\. An lvalue does not designate an object when evaluated (6.3.2.1).
 
 ``` c
-void func() {
+void func(void) {
   int *p;
   {
     int i = 1;
@@ -578,7 +578,7 @@ Reviewers: svoboda
 ### 36\. An object has its stored value accessed other than by an lvalue of an allowable type (6.5.1).
 
 ``` c
-void f(void) {
+void func(void) {
   if (sizeof(int) == sizeof(float)) {
     float f = 0.0f;
     int *ip = (int *)&f;
@@ -602,6 +602,8 @@ long f(long x) {
 }
 
 // In otherfile.c:
+long f(int x);
+
 int g(int x) {
   return f(x);  // Undefined Behavior
 }
@@ -645,10 +647,11 @@ Reviewers: svoboda
 ### 41\. The value of the second operand of the / or % operator is zero (6.5.6).
 
 ``` c
+int init(void) {return 0;}
+
 int divide(int x) {
-  int y;
-  // Initialize y with an untrusted value, which could be 0
-  return x / y;  // Undefined Behavior
+  int y = init(); // 0
+  return x / y;   // Undefined Behavior
 }
 ```
 
@@ -659,10 +662,15 @@ Reviewers: svoboda
 ### 42\. If the quotient a/b is not representable, the behavior of both a/b and a%b (6.5.6).
 
 ``` c
+int init(void) {return -1;}
+
 int remainder(int x) {
-  int y;
-  // Initialize y with an untrusted value, which could be 0
-  return x % y;  // Undefined Behavior
+  int y = init(); // -1
+  return x % y;   // Undefined Behavior
+}
+
+int f(void) {
+  return remainder(INT_MIN);
 }
 ```
 
@@ -677,10 +685,14 @@ Reviewers: svoboda
 static int table[TABLESIZE];
 
 int *f(int index) {
-  if (index < TABLESIZE) {
+  if (index < TABLESIZE) {  // doesn't check for negative values
     return table + index;   // Undefined Behavior
   }
   return NULL;
+}
+
+int *g(void) {
+  return f(getc()); // could be EOF (-1)
 }
 ```
 
@@ -704,6 +716,11 @@ char *get_machine_name(const char *path) {
 
   *machine_name = '\0';
   return machine_name;
+}
+
+void f(void) {
+  char* host = get_machine_name("foo");  // no '\'
+  puts(host);
 }
 ```
 
@@ -773,12 +790,13 @@ Reviewers: svoboda
 
 ``` c
 void func(unsigned int ui_a, unsigned int ui_b) {
-  unsigned int uresult = ui_a << ui_b;  
-  // Undefined Behavior if !( 0 < ui_b < sizeof(ui_a) / CHAR_BIT)
+  unsigned int uresult1 = ui_a << ui_b;
+  // Undefined Behavior if !( 0 < ui_b < UINT_WIDTH)
+  unsigned int uresult2 = ui_a << -1; // Undefined Behavior
 }
 ```
 
-Cite: CERT C Rule INT34-C 1st NCCE 5.5.1, 2nd NCCE 5.5.3, 3rd NCCE 5.5.5
+Cite: CERT C Rule INT35-C 1st NCCE 5.5.1, 2nd NCCE 5.5.3, 3rd NCCE 5.5.5
 
 Reviewers: svoboda
 
@@ -790,12 +808,13 @@ Reviewers: svoboda
 #include <inttypes.h>
 
 void func(signed long si_a, signed long si_b) {
-  signed long result;
+  signed long result1;
   if (si_a > (LONG_MAX >> si_b)) {
     // Handle Error
   } else {
-    result = si_a << si_b;  // Undefined Behavior
+    result1 = si_a << si_b;  // Undefined Behavior if si_a or si_b < 0
   }
+  unsigned int uresult2 = -1 << ui_b; // Undefined Behavior if ui_b != 0
 }
 ```
 
@@ -821,15 +840,26 @@ Reviewers: uecker, svoboda, j.myers
 ### 51\. An object is assigned to an inexactly overlapping object or to an exactly overlapping object with incompatible type (6.5.17.2).
 
 ``` c
-const size_t limit = sizeof(int) + 1;
-char bytes[limit];
-int *p1 = (int *) &(bytes[0]);
-int *p2 = (int *) &(bytes[1]); // overlaps with p1 (unless sizeof(int) == 1)
-*p1 = 123;
-*p2 = *p1;                    // Undefined Behavior
+struct s { double i; } f(void);
+union {
+  struct {
+    int f1;
+    struct s f2;
+  } u1;
+  struct {
+    struct s f3;
+    int f4;
+  } u2;
+} g;
+
+void func(void) {
+  g.u2.f3 = g.u1.f2; // Undefined Behavior
+}
 ```
 
-Reviewers: coates, svoboda
+Cite: C23 s6.8.7.5 p4.
+
+Reviewers: svoboda
 
 ### 52\. An expression that is required to be an integer constant expression does not have an integer type; has operands that are not integer constants, named constants, compound literal constants, enumeration constants, character constants, predefined constants, sizeof expressions whose results are integer constants, alignof expressions, or immediately-cast floating constants; or contains casts (outside operands to sizeof and alignof operators) other than conversions of arithmetic types to integer types (6.6).
 
@@ -1208,7 +1238,7 @@ int repeat(void f(), int *a) {
   f(a);
 }
 
-int main () {
+int main (void) {
   int x = 1;
   repeat(fi, &x); // Undefined Behavior
   return 0;
@@ -1312,7 +1342,7 @@ int add(int first, int second) {
 
 int add(int first, int second, ...);
 
-int main () {
+int main (void) {
   int result = add(2, 3, 5, 7, 11, -1);   // Undefined Behavior
   printf("Sum is %d\n", result);
   return 0;
