@@ -96,18 +96,21 @@ void init_flag(void) {
   atomic_init(&flag, false);
 }
 
+// This function uses only atomic reads & writes, so it has
+// no undefined behavior.
+// but it enables get_flag() to have undefined behavior.
 void toggle_flag(void) {
   bool temp_flag = atomic_load(&flag);
   temp_flag = !temp_flag;
-  atomic_store(&flag, temp_flag);  // Undefined Behavior, race condition
+  atomic_store(&flag, temp_flag);
 }
 
 bool get_flag(void) {
-  return atomic_load(&flag);       // Undefined Behavior, race condition
+  return flag;         // Undefined Behavior, non-atomic read
 }
 ```
 
-Cite: CERT C Rule CON32-C 1st NCCE 14.3.1, CON40-C 1st NCCE 14.11.1
+Cite: CERT C Rule CON40-C 2nd NCCE
 
 Reviewers: svoboda, dave.banham
 
@@ -177,7 +180,7 @@ void squirrel_away(char **ptr_param) {
 void rodent(void) {
   char *ptr;
   squirrel_away(&ptr);
-  // Undefined Behavior if ptr is ever read here
+  char c = *ptr;  // Undefined Behavior: referred-to object no longer exists
 }
 ```
 
@@ -264,8 +267,8 @@ union {
 } u;
 
 u.f = 3.14;
-u.i++;                        // non-representation value for u.f arising from the side effect of the post increment
-printf("value is %f\n", u.f); // Undefined Behavior
+u.i++;                        // Undefined Behavior if u.i has non-value representation from previous statement.
+printf("value is %f\n", u.f); // Undefined Behavior if u.f has non-value representation from previous statement.
 ```
 
 Reviewers: svoboda, dave.banham
@@ -566,8 +569,8 @@ Reviewers: svoboda
 ``` c
 int add(void) {
   int x;
-  // Initialize x with an untrusted value, which could be INT_MAX
-  return x + 1;    // Undefined Behavior
+  scanf("%d", &x);  // Initialize x with an untrusted value, which could be INT_MAX
+  return x + 1;     // Undefined Behavior
 }
 ```
 
@@ -731,19 +734,17 @@ Reviewers: svoboda
 ### 45\. Pointers that do not point into, or just beyond, the same array object are subtracted (6.5.7).
 
 ``` c
-#define SIZE 256
-
-void f(void) {
+enum { SIZE = 32 };
+ 
+void func(void) {
   int nums[SIZE];
-  char *c_str[SIZE];
+  int end;
   int *next_num_ptr = nums;
-  int free_bytes;
+  size_t free_elements;
 
-  // Increment next_num_ptr as array fills...
+  /* Increment next_num_ptr as array fills */
 
-  free_bytes = c_str - (char **)next_num_ptr;   // Undefined Behavior
-  // next_num_ptr part of name array, even if it equals c_str!
-  // ...
+  free_elements = &end - next_num_ptr;
 }
 ```
 
@@ -791,7 +792,7 @@ Reviewers: svoboda
 ``` c
 void func(unsigned int ui_a, unsigned int ui_b) {
   unsigned int uresult1 = ui_a << ui_b;
-  // Undefined Behavior if !( 0 < ui_b < UINT_WIDTH)
+  // Undefined Behavior if ui_b >= UINT_WIDTH
   unsigned int uresult2 = ui_a << -1; // Undefined Behavior
 }
 ```
@@ -1008,9 +1009,9 @@ int *ip;
 const int i = 42;
 
 void func(void) {
-  ipp = &ip;  // Constraint violation
   *ipp = &i;  // Valid
   *ip = 0;    // Undefined Behavior, modifies constant i (was 42)
+  ipp = &ip;  // Constraint violation
 }
 ```
 
@@ -1056,15 +1057,10 @@ Reviewers: uecker, svoboda, j.myers
 
 ``` c
 const struct s { int mem; } cs = { 1 };
-struct s ncs; // the object ncs is modifiable
 typedef int A[2][3];
 const A a = {{4, 5, 6}, {7, 8, 9}}; // array of array of const int
 int *pi;
 const int *pci;
-ncs = cs;      // valid
-cs = ncs;      // Undefined Behavior: violates modifiable lvalue constraint for =
-pi = &ncs.mem; // valid
-
 pi = &cs.mem;  // Undefined Behavior: violates type constraints for =
 pci = &cs.mem; // valid
 pi = a[0];     // Undefined Behavior: a[0] has type "const int *"
@@ -1162,8 +1158,8 @@ Reviewers: svoboda
 int i = 1, j = 2;
 const int *cp = &i; // *cp is constant
 int *ncp = &j;      // *ncp is modifiable
-ncp = cp;           // valid
-cp = ncp;           // Undefined Behavior: violates modifiable lvalue constraint for =
+ncp = cp;           // Undefined Behavior: violates modifiable lvalue constraint for =
+cp = ncp;           // valid
 ```
 
 Reviewers: svoboda
@@ -1319,9 +1315,13 @@ Reviewers: svoboda
 
 ``` c
 int next(int *ip) [[reproducible]] {
-  return *ip++; // Undefined Behavior, not idempotent
+void adjust(unsigned *restrict x, unsigned *restrict y) [[reproducible]] {
+    *x -= 3;  // Undefined Behavior, not reproducible
+    *y += 2;  // Undefined Behavior, not reproducible
 }
 ```
+
+Cite: CERT C Rule DCL42-C 1st NCCE
 
 Reviewers: svoboda
 
@@ -1461,7 +1461,7 @@ Reviewers: svoboda
 
 ``` c
 #define s(x) #x
-char *x = "s(\)";  // Ill-formed, lone single quote
+char *x = s(\);  // Ill-formed, lone single quote
 ```
 
 Reviewers: svoboda, UBSG
@@ -1481,7 +1481,7 @@ Reviewers: svoboda
 
 ``` c
 #line 10000000000
-// Undefined Behavior, > 2^32
+// Undefined Behavior, > 2^31 - 1
 ```
 
 Reviewers: svoboda
@@ -1580,7 +1580,7 @@ Reviewers: svoboda
 ### 103\. A standard header is included while a macro is defined with the same name as a keyword (7.1.2).
 
 ``` c
-#define do int x;
+#define sin int x;
 
 #include <stdio.h>
 // Undefined Behavior, sin() already defined
@@ -1645,6 +1645,9 @@ Reviewers: svoboda, j.myers
 ``` c
 void f1(size_t nchars) {
   char *p = malloc(nchars);
+  if (nchars == SIZE_MAX) {
+    // Handle Error
+  }
   const size_t n = nchars + 1;
   if (p) {
     memset(p, 0, n); // Undefined Behavior, 1-byte buffer overflow
@@ -1696,8 +1699,11 @@ Reviewers: svoboda
 ``` c
 void f(void) {
   float a = 4.0 / 7;
+
   #pragma STDC FP_CONTRACT OFF
-  a *= 7;   // Undefined Behavior
+  // Undefined Behavior
+
+  a *= 7;
   printf("A is %f\n", a);
 }
 ```
@@ -1707,14 +1713,16 @@ Reviewers: svoboda
 ### 112\. The value of an argument to a character handling function is neither equal to the value of EOF nor representable as an unsigned char (7.4).
 
 ``` c
-size_t count_preceding_whitespace(const char *s) {
+void count_preceding_whitespace(const char *s) {
   const char *t = s;
   size_t length = strlen(s) + 1;
 
-  while (isspace(*t) && (t - s < length)) {  // Undefined Behavior, if char is signed
+  while (isspace(*t) && (t - s < length)) {  // Undefined Behavior, if char is signed and *t = -2
     ++t;
   }
-  return t - s;
+
+  int c = UCHAR_MAX + 1;
+  int result = isspace(c);                    // Undefined Behavior
 }
 ```
 
@@ -1862,8 +1870,11 @@ Reviewers: svoboda
 ### 123\. An argument to a floating-point classification or comparison macro is not of real floating type (7.12.3, 7.12.17).
 
 ``` c
+#include <math.h>
+#include <complex.h>
+
 double complex p = CMPLX( 2, 3); // 2 + 3i
-if (isfinite(p) {  // Undefined Behavior
+if (isfinite(p)) {  // Undefined Behavior
   // ...
 }
 ```
@@ -2281,8 +2292,9 @@ void f(int last, ...) {
   va_end(args);
 }
 
-void main(void) {
+int main(void) {
   f(1, 2, 3);
+  return 0;
 }
 ```
 
@@ -2461,22 +2473,8 @@ Reviewers: svoboda
 
 ### 146\. The type parameter of an offsetof macro defines a new type (7.21).
 
-HYPOTHETICAL COMPILABLE EXAMPLE?
-
 ``` c
-int plus(int a, int b) {
-  return a+b;
-}
-
-typedef int binary_f(int, int);
-binary_f *add = plus;
-
-typedef struct st {
-  int num1;
-  int num2;
-} binary_s;
-
-size_t z = offsetof( int (*)(int, int), num2);  // Undefined Behavior
+offsetof(struct S { int member; }, member);  // Undefined Behavior
 ```
 
 NOTE: j.myers says:
@@ -2501,7 +2499,7 @@ Reviewers: svoboda
 int i = 1;
 int *pi = &i;
 nullptr_t n = nullptr;
-memcpy(&n, pi, sizeof(n));
+memcpy(&n, &pi, sizeof(n));
 pi = n; // Undefined Behavior
 ```
 
@@ -2540,7 +2538,7 @@ int main(void) {
   FILE *in = fopen("foo.txt", "r");
 
   wchar_t wide_line[80];
-  fgetws(wide_line, sizeof(wchar_t) * sizeof(wide_line), in);
+  fgetws(wide_line, sizeof(wide_line) / sizeof(wchar_t), in);
   // The stream is now oriented for wide characters
   wprintf(L"The first line is: %ls", wide_line);
 
@@ -2775,9 +2773,12 @@ Reviewers: svoboda, j.myers
 
 ``` c
 #include <stdio.h>
+#include <limits.h>
 
-void f(int i) {
-  printf("%*iX", INT_MAX, i);  // Undefined Behavior
+char dest[10];
+
+int f(int i) {
+  return snprintf(dest, 10, "%*iX", INT_MAX, i);  // Undefined Behavior
 }
 ```
 
@@ -2845,8 +2846,8 @@ Reviewers: svoboda
 setlocale(LC_ALL, "UTF-8");
 // In UTF-8: the Euro symbol == '€' == U+20AC == \xE2 \x82 \xAC == \342 \202 \254
 const char invalid[] = {'\xE2', '\0'};  // invalid UTF-8
-char c;
-sscanf(invalid, "%c", &c);  // Undefined Behavior in UTF-8 locale
+wchar_t wc;
+sscanf(invalid, "%lc", &wc);  // Undefined Behavior
 ```
 
 Reviewers: svoboda, j.myers
@@ -2897,12 +2898,12 @@ Reviewers: svoboda
 ### 176\. The n parameter is negative or zero for a call to fgets or fgetws. (7.23.7.2, 7.31.3.2).
 
 ``` c
-const int buf_size = -1;      // Oops, should be > 0!
-char buf[buf_size];
+char buf[10];
 FILE *f = fopen("foo", "r");
 if (f == NULL) {
   printf("Can't open foo\n");
 }
+const int buf_size = 0;       // Oops, meant to be 10!
 fgets( buf, buf_size, f);     // Undefined Behavior
 ```
 
@@ -3210,7 +3211,7 @@ void exit_handler(void) {
 }
 
 int main(void) {
-  if (atexit(exit_handler) != 0) {
+  if (at_quick_exit(exit_handler) != 0) {
     // Handle Error
   }
   quick_exit(0);
@@ -3599,13 +3600,6 @@ Reviewers: svoboda, j.myers
 ``` c
 #include <threads.h>
 
-void destructor(void *arg) {
-  tss_t key;
-  if (thrd_success != tss_create(&key, 0)) { // Undefined Behavior
-    // Handle Error
-  }
-}
-
 int func(void *) {
   tss_t key;
   static char str[] = "Hello";
@@ -3676,7 +3670,7 @@ Reviewers: svoboda
 #include <time.h>
 
 void func(struct tm *time_tm) {
-  time_tm.tm_sec = 61;  // Invalid value, 0 < tm_sec < 60
+  time_tm.tm_sec = 61;  // Invalid value, 0 <= tm_sec <= 60
   char *time = asctime(time_tm);  // Undefined Behavior
   // ...
 }
