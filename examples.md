@@ -1075,11 +1075,16 @@ Reviewers: svoboda
 ### 65\. An object which has been modified is accessed through a restrict-qualified pointer to a const-qualified type, or through a restrict-qualified pointer and another pointer that are not both based on the same object (6.7.4.2).
 
 ``` c
+// This is the same function signature as memcpy()
+void *my_memcpy(void * restrict s1, const void * restrict s2, size_t n) {
+  memcpy( s1, s2, n);
+}
+
 void abcabc(void) {
   char c_str[]= "abc123edf";
   char *ptr1 = c_str;
   char *ptr2 = c_str + strlen("abc");
-  memcpy(ptr2, ptr1, 6);   // Undefined Behavior, objects of ptr1 & ptr2 overlap
+  my_memcpy(ptr2, ptr1, 6);   // Undefined Behavior, objects of ptr1 & ptr2 overlap
   puts(c_str);
 }
 ```
@@ -1166,12 +1171,15 @@ Reviewers: svoboda
 ### 72\. The size expression in an array declaration is not a constant expression and evaluates at program execution time to a nonpositive value (6.7.7.3).
 
 ``` c 
-int size = -4;
+void func(int size) {
+  // This creates a VLA if size > 0
+  int arr[size];  // Undefined Behavior if size <= 0
+  //  ... work with arr
+}
 
-// This creates a VLA.
-int arr[size];
-
-printf("%d\n",sizeof(arr));  // Undefined Behavior
+int g(void) {
+  func( getc()); // could be EOF (< 0)
+}
 ```
 
 Reviewers: svoboda
@@ -1451,8 +1459,6 @@ Reviewers: svoboda
 
 ### 93\. The result of the preprocessing operator # is not a valid character string literal (6.10.5.2).
 
-HYPOTHETICAL COMPILABLE EXAMPLE?
-
 ``` c
 #define s(x) #x
 char *x = "s(\)";  // Ill-formed, lone single quote
@@ -1530,8 +1536,8 @@ Reviewers: svoboda
 ### 100\. A file with the same name as one of the standard headers, not provided as part of the implementation, is placed in any of the standard places that are searched for included source files (7.1.2).
 
 ``` c
-#include "stdio.h"
-// Undefined Behavior, distinct from <stdio.h> */
+#include <stdio.h>
+// Undefined Behavior if a non-standard stdio.h exists in include path */
 ```
 
 Cite: CERT C Rec PRE04-C 1st NCCE
