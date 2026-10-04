@@ -1682,8 +1682,11 @@ Reviewers: svoboda
 ``` c
 #include <assert.h>
 
-int a[5];   // An array is considered an aggregate type (C23 s6.2.5p26).
-assert(a);  // Undefined Behavior
+struct {
+  int x;
+  int y;
+} s;
+assert(s);  // Undefined Behavior
 ```
 
 Reviewers: svoboda
@@ -1979,7 +1982,7 @@ Reviewers: svoboda
 #include <signal.h>
 
 void *handler = NULL;
-signal(SIG_IGN, handler);  // Undefined Behavior
+signal(SIGALRM, handler);  // Undefined Behavior
 ```
 
 Reviewers: svoboda
@@ -2377,33 +2380,33 @@ Reviewers: svoboda, UBSG
 ### 142\. Using a null pointer constant in form of an integer expression as an argument to a ... function and then interpreting it as a void \* or char \* (7.16.1.1).
 
 ``` c
-#include <stdarg.h>
+ #include <stdarg.h>
 #include <stdio.h>
 
-int contains_zero(size_t count, va_list ap) {
-  for (size_t i = 1; i < count; ++i) {
-    if (va_arg(ap, double) == 0.0) {
-      return 1;
-    }
+int print_string(va_list *ap) {
+  char* name = va_arg(*ap, char*);  // Undefined Behavior, if value is NULL
+  if (name != NULL) {
+    printf("Name: %s\n", name);
+  } else {
+    printf("No more names\n");
   }
   return 0;
 }
 
-int print_reciprocals(size_t count, ...) {
+int print_names(int count, ...) {
   va_list ap;
   va_start(ap, count);
-
-  if (contains_zero(count, ap)) {  // Undefined Behavior
-    va_end(ap);
-    return 1;
+  for (int i = 0; i < count; i++) {
+    print_string(&ap);
   }
-
-  for (size_t i = 0; i < count; ++i) {
-    printf("%f ", 1.0 / va_arg(ap, double));
-  }
-
   va_end(ap);
-  return 0;
+  print_string(NULL);               // Creates Undefined Behavior
+  return 1;
+}
+
+
+void func() {
+  print_names( 3, "Tom", "Dick", "Harry");
 }
 ```
 
@@ -2429,14 +2432,16 @@ Reviewers: svoboda, j.myers
 
 ### 144\. The va\_start macro is invoked with additional arguments that include unbalanced parentheses, or unrecognized preprocessing tokens (7.16.1.4).
 
+HYPOTHETICAL COMPILABLE EXAMPLE?
+
 ``` c
 #include <stdarg.h>
 
-#define CUBE(X) ((X) * (X) * (X))
+  #define PAREN (
 
 void f(int last, ...) {
   va_list args;
-  va_start( args, CUBE(last));   // Undefined Behavior
+  va_start( args, PAREN);   // Undefined Behavior
   va_end(args);
 }
 ```
@@ -2515,7 +2520,7 @@ typedef struct st {
 size_t z = offsetof( binary_s, num3);   // Undefined Behavior, should be num2
 ```
 
-Reviewers: svoboda
+Reviewers: svoboda, myers
 
 ### 150\. The argument in an instance of one of the integer-constant macros is not a decimal, octal, or hexadecimal constant, or it has a value that exceeds the limits for the corresponding type (7.22.4).
 
@@ -2523,7 +2528,7 @@ Reviewers: svoboda
 unsigned char i = UINT8_C(0x123); // Undefined Behavior, 0x123 > 2^8
 ```
 
-Reviewers: svoboda
+Reviewers: svoboda, j.myers
 
 ### 151\. A byte input/output function is applied to a wide-oriented stream, or a wide character input/output function is applied to a byte-oriented stream (7.23.2).
 
@@ -3333,7 +3338,8 @@ Reviewers: svoboda, j.myers
 char src[] = "This is a test";
 const int string_size = strlen(src) + 1;
 char dest[string_size - 1];                     // Oops, too small!
-int length = strxfrm(dest, src, string_size);   // Undefined Behavior
+int length = strxfrm(dest, src, string_size);
+puts(dest);                                     // Undefined Behavior
 ```
 
 Reviewers: svoboda
@@ -3670,6 +3676,7 @@ Reviewers: svoboda
 #include <time.h>
 
 void func(struct tm *time_tm) {
+  time_tm.tm_sec = 61;  // Invalid value, 0 < tm_sec < 60
   char *time = asctime(time_tm);  // Undefined Behavior
   // ...
 }
@@ -3688,7 +3695,7 @@ Reviewers: svoboda
 setlocale(LC_ALL, "UTF-8");
 // In UTF-8: the Euro symbol == '€' == U+20AC == \xE2 \x82 \xAC == \342 \202 \254
 const char invalid[] = {'\xE2', '\0'};   // invalid UTF-8
-fwprintf(stdout, L"The string is %ls\n", invalid);
+fwprintf(stdout, L"The string is %s\n", invalid);
 // Undefined Behavior in UTF-8 locale
 ```
 
