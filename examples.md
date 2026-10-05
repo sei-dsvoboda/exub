@@ -42,7 +42,7 @@ See UB Example #4, which violates a 'shall' statement.
 
 Reviewers: svoboda, UBSG
 
-### 2\. A nonempty source file does not end in a new-line character which is not immediately preceded by a backslash character or ends in a partial preprocessing token or comment (5.1.1.2).
+### 2\. A nonempty source file does not end in a new-line character which is not immediately preceded by a backslash character or ends in a partial preprocessing token or comment (5.2.1.2).
 
 ``` c
 // Undefined Behavior
@@ -54,7 +54,7 @@ Cite: CERT C Rec MSC04-C 1st NCCE
 
 Reviewers: svoboda
 
-### 3\. Token concatenation produces a character sequence matching the syntax of a universal character name (5.1.1.2).
+### 3\. Token concatenation produces a character sequence matching the syntax of a universal character name (5.2.1.2).
 
 ``` c
 #define assign(uc1, uc2, val) uc1##uc2 = val
@@ -71,7 +71,7 @@ Cite: CERT C Rule PRE30-C 1st NCCE 2.1.1
 
 Reviewers: svoboda, dave.banham
 
-### 4\. A program in a hosted environment does not define a function named main using one of the specified forms (5.1.2.3.2).
+### 4\. A program in a hosted environment does not define a function named main using one of the specified forms (5.2.2.3.2).
 
 ``` c
 #include <stdio.h>
@@ -84,7 +84,7 @@ int main(float argc) {  // Undefined Behavior
 
 Reviewers: s.maddanimath, svoboda, UBSG, j.myers
 
-### 5\. The execution of a program contains a data race (5.1.2.5).
+### 5\. The execution of a program contains a data race (5.2.2.5).
 
 ``` c
 #include <stdatomic.h>
@@ -114,7 +114,7 @@ Cite: CERT C Rule CON40-C 2nd NCCE
 
 Reviewers: svoboda, dave.banham
 
-### 6\. A character not in the basic source character set is encountered in a source file, except in an identifier, a character constant, a string literal, a header name, a comment, or a preprocessing token that is never converted to a token (5.2.1).
+### 6\. A character not in the basic source character set is encountered in a source file, except in an identifier, a character constant, a string literal, a header name, a comment, or a preprocessing token that is never converted to a token (5.3.1).
 
 EXTENDED COMPILABLE EXAMPLE: Consider the following non-standard extension: a compiler that accepts the non-ASCII character: `÷` to act as a division operator.  Consequently, in this compiler, the following code would be well-defined, but it is undefined behavior for compilers without this extension (and also a syntax error):
 
@@ -125,7 +125,7 @@ double x = 3 ÷ 7; // Undefined Behavior
 
 Reviewers: svoboda
 
-### 7\. An identifier, comment, string literal, character constant, or header name contains an invalid multibyte character or does not begin and end in the initial shift state (5.2.2).
+### 7\. An identifier, comment, string literal, character constant, or header name contains an invalid multibyte character or does not begin and end in the initial shift state (5.3.2).
 
 ``` c
 /* In UTF-8 Lowercase n-with-tilde == ñ == U+00F1 == 0xC3 0xB1 == \303 \261 */
@@ -305,7 +305,7 @@ int i = (f()
 
 Reviewers: svoboda
 
-### 16\. Conversion to or from an integer type produces a value outside the range that can be represented (6.3.1.4).
+### 16\. Conversion to or from an integer type produces a value outside the range that can be represented (6.3.2.4).
 
 ``` c
 void func(float f_a) {
@@ -318,7 +318,7 @@ Cite: CERT C Rule FLP34-C 1st NCCE 6.3.1, FLP36-C 1st NCCE 6.4.1
 
 Reviewers: svoboda
 
-### 17\. Demotion of one real floating type to another produces a value outside the range that can be represented (6.3.2.1).
+### 17\. Demotion of one real floating type to another produces a value outside the range that can be represented (6.3.2.5).
 
 ``` c
 void func(double d_a, long double big_d) {
@@ -332,7 +332,7 @@ Cite: CERT C Rule FLP34-C 2nd NCCE 6.3.3
 
 Reviewers: svoboda
 
-### 18\. An lvalue does not designate an object when evaluated (6.3.2.1).
+### 18\. An lvalue does not designate an object when evaluated (6.3.3.1).
 
 ``` c
 void func(void) {
@@ -352,7 +352,7 @@ void func(void) {
 
 Reviewers: svoboda, UBSG
 
-### 19\. A non-array lvalue with an incomplete type is used in a context that requires the value of the designated object (6.3.2.1).
+### 19\. A non-array lvalue with an incomplete type is used in a context that requires the value of the designated object (6.3.3.1).
 
 ``` c
 struct f *p;
@@ -363,7 +363,7 @@ void g(void) {
 
 Reviewers: uecker, j.myers
 
-### 20\. An lvalue designating an object of automatic storage duration that could have been declared with the register storage class is used in a context that requires the value of the designated object, but the object is uninitialized. (6.3.2.1).
+### 20\. An lvalue designating an object of automatic storage duration that could have been declared with the register storage class is used in a context that requires the value of the designated object, but the object is uninitialized. (6.3.3.1).
 
 ``` c
 void f(void) {
@@ -374,7 +374,7 @@ void f(void) {
 
 Reviewers: svoboda, uecker, j.myers
 
-### 21\. An lvalue having array type is converted to a pointer to the initial element of the array, and the array object has register storage class (6.3.2.1).
+### 21\. An lvalue having array type is converted to a pointer to the initial element of the array, and the array object has register storage class (6.3.3.1).
 
 ``` c
 void f(void) {
@@ -387,7 +387,7 @@ void f(void) {
 
 Reviewers: svoboda
 
-### 22\. An attempt is made to use the value of a void expression, or an implicit or explicit conversion (except to void) is applied to a void expression (6.3.2.2).
+### 22\. An attempt is made to use the value of a void expression, or an implicit or explicit conversion (except to void) is applied to a void expression (6.3.3.2).
 
 ``` c
 void f(int x) {
@@ -402,7 +402,7 @@ printf("y is %d\n", y);
 
 Reviewers: svoboda, dave.banham
 
-### 23\. Conversion of a pointer to an integer type produces a value outside the range that can be represented (6.3.2.3).
+### 23\. Conversion of a pointer to an integer type produces a value outside the range that can be represented (6.3.3.3).
 
 ``` c
 void f(void) {
@@ -417,7 +417,7 @@ Cite: TS17961 5.10 \[intptrconv\] EXAMPLE 1,2
 
 Reviewers: svoboda
 
-### 24\. Conversion between two pointer types produces a result that is incorrectly aligned (6.3.2.3).
+### 24\. Conversion between two pointer types produces a result that is incorrectly aligned (6.3.3.3).
 
 ``` c
 void f(void) {
@@ -432,7 +432,7 @@ Cite: TS17961 5.11 \[alignconv\] EXAMPLE 1
 
 Reviewers: svoboda
 
-### 25\. A pointer is used to call a function whose type is not compatible with the referenced type (6.3.2.3).
+### 25\. A pointer is used to call a function whose type is not compatible with the referenced type (6.3.3.3).
 
 ``` c
 typedef char *(*fp_t)(void);
@@ -459,7 +459,7 @@ bar";   // Undefined Behavior
 
 Reviewers: svoboda, UBSG
 
-### 27\. A reserved keyword token is used in translation phase 7 or 8 (5.1.1.2) for some purpose other than as a keyword (6.4.1).
+### 27\. A reserved keyword token is used in translation phase 7 or 8 (5.2.1.2) for some purpose other than as a keyword (6.4.2).
 
 EXTENDED COMPILABLE EXAMPLE: Consider a platform that allows keywords to be used as identifiers:
 
@@ -469,7 +469,7 @@ int if = 3;  // Undefined Behavior
 
 Reviewers: svoboda, UBSG, dave.banham
 
-### 28\. A universal character name in an identifier does not designate a character whose encoding falls into one of the specified ranges (6.4.2.1).
+### 28\. A universal character name in an identifier does not designate a character whose encoding falls into one of the specified ranges (6.4.3.1).
 
 EXTENDED COMPILABLE EXAMPLE: Consider a platform that allows the division sign `÷` to be used as identifiers:
 
@@ -480,7 +480,7 @@ double ONE\u00F7TWO = 0.5;  // ONE ÷ TWO, Undefined Behavior
 
 Reviewers: svoboda, UBSG
 
-### 29\. The initial character of an identifier is a universal character name designating a digit (6.4.2.1).
+### 29\. The initial character of an identifier is a universal character name designating a digit (6.4.3.1).
 
 EXTENDED COMPILABLE EXAMPLE: Consider a platform that accepts universal character names that designate digits to be used as identifiers:
 
@@ -490,7 +490,7 @@ int U+FF11N = 1;  // "１N", Undefined Behavior (U+FF11 is the full width (CJK) 
 
 Reviewers: svoboda, UBSG, dave.banham
 
-### 30\. Two identifiers differ only in nonsignificant characters (6.4.2.1).
+### 30\. Two identifiers differ only in nonsignificant characters (6.4.3.1).
 
 ``` c
 // In bash/bashline.h:
@@ -517,7 +517,7 @@ Cite: TS17961 5.13 \[funcdecl\] EXAMPLE 4
 
 Reviewers: svoboda
 
-### 31\. The identifier \_\_func\_\_ is explicitly declared (6.4.2.2).
+### 31\. The identifier \_\_func\_\_ is explicitly declared (6.4.3.2).
 
 ``` c
 void __func__(void); // Undefined Behavior
@@ -525,7 +525,7 @@ void __func__(void); // Undefined Behavior
 
 Reviewers: svoboda, j.myers
 
-### 32\. The program attempts to modify a string literal (6.4.5).
+### 32\. The program attempts to modify a string literal (6.4.6).
 
 ``` c
 void f1(void) {
@@ -539,7 +539,7 @@ Cite: TS17961 5.28 \[strmod\] EXAMPLE 1, 2, 3, 4, 5
 
 Reviewers: svoboda
 
-### 33\. The characters ', \\, ", //, or /\* occur in the sequence between the \< and > delimiters, or the characters ', \\, //, or /\* occur in the sequence between the " delimiters, in a header name preprocessing token (6.4.7).
+### 33\. The characters ', \\, ", //, or /\* occur in the sequence between the \< and > delimiters, or the characters ', \\, //, or /\* occur in the sequence between the " delimiters, in a header name preprocessing token (6.4.8).
 
 ``` c
 #include "dave's_hello.h"
@@ -548,7 +548,7 @@ Reviewers: svoboda
 
 Reviewers: svoboda, j.myers
 
-### 34\. A side effect on a scalar object is unsequenced relative to either a different side effect on the same scalar object or a value computation using the value of the same scalar object (6.5).
+### 34\. A side effect on a scalar object is unsequenced relative to either a different side effect on the same scalar object or a value computation using the value of the same scalar object (6.5.1).
 
 ``` c
 #define CUBE(X) ((X) * (X) * (X))
@@ -564,7 +564,7 @@ Cite: CERT C Rec PRE00-C 1st NCCE, 3rd NCCE
 
 Reviewers: svoboda
 
-### 35\. An exceptional condition occurs during the evaluation of an expression (6.5.).
+### 35\. An exceptional condition occurs during the evaluation of an expression (6.5.1).
 
 ``` c
 int add(void) {
@@ -627,7 +627,7 @@ foo.x;   // Undefined Behavior
 
 Reviewers: uecker, svoboda, j.myers
 
-### 39\. The operand of the unary \* operator has an invalid value (6.5.4.2).
+### 39\. The operand of the unary \* operator has an invalid value (6.5.4.3).
 
 ``` c
 char *p = NULL;
@@ -1001,7 +1001,7 @@ Reviewers:
 
 Note: Removed from J.2. by [N3244](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3244.pdf)
 
-### 61\. An attempt is made to modify an object defined with a const-qualified type through use of an lvalue with non-const-qualified type (6.7).
+### 61\. An attempt is made to modify an object defined with a const-qualified type through use of an lvalue with non-const-qualified type (6.7.4).
 
 ``` c
 const int **ipp;
@@ -1216,7 +1216,7 @@ int main(void) {
 
 Reviewers: svoboda
 
-### 75\. A storage-class specifier or type qualifier modifies the keyword void as a function parameter type list (6.7.74).
+### 75\. A storage-class specifier or type qualifier modifies the keyword void as a function parameter type list (6.7.7.4).
 
 ``` c
 void f(const void);
@@ -1251,6 +1251,9 @@ int main (void) {
 
 Reviewers: svoboda
 
+---
+==**Deleted from ISO C23**==
+~~
 ### 77\. A declaration for which a type is inferred contains a pointer, array, or function declarators (6.7.10).
 
 ``` c
@@ -1270,6 +1273,8 @@ auto i = 3, j = 4.5; // Undefined Behavior
 ```
 
 Reviewers: svoboda
+~~
+---
 
 ### 79\. The value of an unnamed member of a structure or union is used (6.7.11).
 
@@ -1277,7 +1282,7 @@ TODO
 
 Reviewers:
 
-Note: Removed from J.2. by [N3245](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3345.pdf)
+~~Note: Removed from J.2. by [N3245](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3345.pdf)~~
 
 ### 80\. The initializer for a scalar is neither a single expression, an empty initializer, nor a single expression enclosed in braces (6.7.11).
 
@@ -1424,12 +1429,17 @@ EXTENDED COMPILABLE EXAMPLE: Consider a platform that allows prefix and suffix c
 
 Reviewers: svoboda, gustedt
 
+### *89\.The #embed preprocessing directive that results after expansion does not match any of the name forms (6.10.4).*
+** NEW **
+
 ### 91\. The character sequence in an #include preprocessing directive does not start with a letter (6.10.3).
 
 ``` c
 #include "2file.h"
 // Undefined Behavior
 ```
+
+### *91\. The character sequence in an #embed preprocessing directive does not start with a letter (6.10.4).*
 
 Reviewers: svoboda
 
@@ -1457,7 +1467,7 @@ Cite: CERT C Rule PRE32-C 1st NCCE 2.3.1
 
 Reviewers: svoboda
 
-### 93\. The result of the preprocessing operator # is not a valid character string literal (6.10.5.2).
+### 93\. The result of the preprocessing operator # is not a valid character string literal (6.10.5.3).
 
 ``` c
 #define s(x) #x
@@ -1466,7 +1476,7 @@ char *x = s(\);  // Ill-formed, lone single quote
 
 Reviewers: svoboda, UBSG
 
-### 94\. The result of the preprocessing operator ## is not a valid preprocessing token (6.10.5.3).
+### 94\. The result of the preprocessing operator ## is not a valid preprocessing token (6.10.5.4).
 
 HYPOTHETICAL COMPILABLE EXAMPLE?
 
@@ -1694,7 +1704,7 @@ assert(s);  // Undefined Behavior
 
 Reviewers: svoboda
 
-### 111\. The CX\_LIMITED\_RANGE, FENV\_ACCESS, or FP\_CONTRACT pragma is used in any context other than outside all external declarations or preceding all explicit declarations and statements inside a compound statement (7.3.4, 7.6.1, 7.12.2).
+### 111\. The CX\_LIMITED\_RANGE, FENV\_ACCESS, or FP\_CONTRACT pragma is used in any context other than outside all external declarations or preceding all explicit declarations and statements inside a compound statement (7.3.4, 7.6.2, 7.12.3).
 
 ``` c
 void f(void) {
@@ -1741,7 +1751,7 @@ CERT C Rule MSC38-C 2nd NCCE 15.5.3
 
 Reviewers: svoboda
 
-### 114\. Part of the program tests floating-point status flags, sets floating-point control modes, or runs under non-default mode settings, but was translated with the state for the FENV\_ACCESS pragma "off" (7.6.1).
+### 114\. Part of the program tests floating-point status flags, sets floating-point control modes, or runs under non-default mode settings, but was translated with the state for the FENV\_ACCESS pragma "off" (7.6.2).
 
 ``` c
 #pragma STDC FENV_ACCESS OFF
@@ -1756,7 +1766,7 @@ if (set_excepts & FE_INVALID) {
 
 Reviewers: svoboda
 
-### 115\. The exception-mask argument for one of the functions that provide access to the floating-point status flags has a nonzero value not obtained by bitwise OR of the floating-point exception macros (7.6.4).
+### 115\. The exception-mask argument for one of the functions that provide access to the floating-point status flags has a nonzero value not obtained by bitwise OR of the floating-point exception macros (7.6.5).
 
 ``` c
 #pragma STDC FENV_ACCESS ON
@@ -1765,7 +1775,7 @@ int set_excepts = fetestexcept(1); // Undefined Behavior
 
 Reviewers: svoboda
 
-### 116\. The fesetexceptflag function is used to set floating-point status flags that were not specified in the call to the fegetexceptflag function that provided the value of the corresponding fexcept\_t object (7.6.4.5).
+### 116\. The fesetexceptflag function is used to set floating-point status flags that were not specified in the call to the fegetexceptflag function that provided the value of the corresponding fexcept\_t object (7.6.5.6).
 
 ``` c
 #pragma STDC FENV_ACCESS ON
@@ -1777,7 +1787,7 @@ fesetexceptflag(&excepts,FE_ALL_EXCEPT);
 
 Reviewers: svoboda
 
-### 117\. The argument to fesetenv or feupdateenv is neither an object set by a call to fegetenv or feholdexcept, nor is it an environment macro (7.6.6.3, 7.6.6.4).
+### 117\. The argument to fesetenv or feupdateenv is neither an object set by a call to fegetenv or feholdexcept, nor is it an environment macro (7.6.7.4, 7.6.7.5).
 
 ``` c
 #pragma STDC FENV_ACCESS ON
@@ -1789,7 +1799,7 @@ fesetenv(&fenv);
 
 Reviewers: svoboda
 
-### 118\. The value of the result of an integer arithmetic or conversion function cannot be represented (7.8.2.1, 7.8.2.2, 7.8.2.3, 7.8.2.4, 7.24.6.1, 7.24.6.2, 7.24.1).
+### 118\. The value of the result of an integer arithmetic or conversion function cannot be represented (7.8.3.1, 7.8.3.2, 7.8.3.3, 7.8.3.4, 7.24.7.1, 7.24.7.2, 7.24.2).
 
 ``` c
 intmax_t x = INTMAX_MIN;
@@ -1798,7 +1808,7 @@ intmax_t px = imaxabs(x);  // Undefined Behavior
 
 Reviewers: svoboda
 
-### 119\. The program modifies the string pointed to by the value returned by the setlocale function (7.11.1.1).
+### 119\. The program modifies the string pointed to by the value returned by the setlocale function (7.11.2).
 
 ``` c
 void f1(void) {
@@ -1823,7 +1833,7 @@ Cite: TS17961 5.29 \[libmod\] EXAMPLE 1
 
 Reviewers: svoboda
 
-### 120\. A pointer returned by the setlocale function is used after a subsequent call to the function, or after the calling thread has exited (7.11.1.1).
+### 120\. A pointer returned by the setlocale function is used after a subsequent call to the function, or after the calling thread has exited (7.11.2).
 
 ``` c
 #include <locale.h>
@@ -1839,7 +1849,7 @@ int size = strlen(locale1);  // Undefined Behavior
 
 Reviewers: svoboda, j.myers
 
-### 121\. The program modifies the structure pointed to by the value returned by the localeconv function (7.11.2.1).
+### 121\. The program modifies the structure pointed to by the value returned by the localeconv function (7.11.3.1).
 
 ``` c
 void f2(void) {
@@ -1867,7 +1877,7 @@ int math_errhandling;  // Undefined Behavior
 
 Reviewers: svoboda
 
-### 123\. An argument to a floating-point classification or comparison macro is not of real floating type (7.12.3, 7.12.17).
+### 123\. An argument to a floating-point classification or comparison macro is not of real floating type (7.12.4, 7.12.18).
 
 ``` c
 #include <math.h>
@@ -1891,7 +1901,7 @@ int setjmp(char *foo);  // Undefined Behavior
 
 Reviewers: svoboda, j.myers
 
-### 125\. An invocation of the setjmp macro occurs other than in an allowed context (7.13.2.1).
+### 125\. An invocation of the setjmp macro occurs other than in an allowed context (7.13.3.1).
 
 ``` c
 jmp_buf buf;
@@ -1915,7 +1925,7 @@ Cite: CERT C Rec MSC22-C 1st NCCE
 
 Reviewers: svoboda
 
-### 126\. The longjmp function is invoked to restore a nonexistent environment (7.13.2.1).
+### 126\. The longjmp function is invoked to restore a nonexistent environment (7.13.3.1).
 
 ``` c
 #include <setjmp.h>
@@ -1987,7 +1997,7 @@ Cite: CERT C Rec MSC22-C 3rd NCCE
 
 Reviewers: svoboda
 
-### 128\. The program specifies an invalid pointer to a signal handler function (7.14.1.1).
+### 128\. The program specifies an invalid pointer to a signal handler function (7.14.2.1).
 
 ``` c
 #include <signal.h>
@@ -1998,7 +2008,7 @@ signal(SIGALRM, handler);  // Undefined Behavior
 
 Reviewers: svoboda
 
-### 129\. A signal handler returns when the signal corresponded to a computational exception (7.14.1.1).
+### 129\. A signal handler returns when the signal corresponded to a computational exception (7.14.2.1).
 
 ``` c
 #include <errno.h>
@@ -2040,7 +2050,7 @@ Cite: CERT C Rule: SIG35-C, 1st NCCE
 
 Reviewers: svoboda
 
-### 130\. A signal handler called in response to SIGFPE, SIGILL, SIGSEGV, or any other implementation-defined value corresponding to a computational exception returns (7.14.1.1).
+### 130\. A signal handler called in response to SIGFPE, SIGILL, SIGSEGV, or any other implementation-defined value corresponding to a computational exception returns (7.14.2.1).
 
 See UB Example #129.
 
@@ -2048,7 +2058,7 @@ Cite: CERT C Rule SIG35-C 1st NCCE 12.4.1
 
 Reviewers: svoboda
 
-### 131\. A signal occurs as the result of calling the abort or raise function, and the signal handler calls the raise function (7.14.1.1).
+### 131\. A signal occurs as the result of calling the abort or raise function, and the signal handler calls the raise function (7.14.2.1).
 
 ``` c
 void term_handler(int signum) {
@@ -2087,7 +2097,7 @@ CERT C Rule SIG30-C 3rd NCCE 12.1.5
 
 Reviewers: svoboda
 
-### 132\. A signal occurs other than as the result of calling the abort or raise function, and the signal handler refers to an object with static or thread storage duration that is not a lock-free atomic object other than by assigning a value to an object declared as volatile sig\_atomic\_t, or calls any function in the standard library other than the abort function, the \_Exit function, the quick\_exit function, the functions in \<stdatomic.h> (except where explicitly stated otherwise) when the atomic arguments are lock-free, the atomic\_is\_lock\_free function with any atomic argument, or the signal function (for the same signal number) (7.14.1.1).
+### 132\. A signal occurs other than as the result of calling the abort or raise function, and the signal handler refers to an object with static or thread storage duration that is not a lock-free atomic object other than by assigning a value to an object declared as volatile sig\_atomic\_t, or calls any function in the standard library other than the abort function, the \_Exit function, the quick\_exit function, the functions in \<stdatomic.h> (except where explicitly stated otherwise) when the atomic arguments are lock-free, the atomic\_is\_lock\_free function with any atomic argument, or the signal function (for the same signal number) (7.14.2.1).
 
 ``` c
 #define MAX_MSG_SIZE 24
@@ -2120,7 +2130,7 @@ Cite: TS17961 5.3 \[accsig\] EXAMPLE, 5.5 \[asyncsig\] EXAMPLE 1, 3
 
 Reviewers: svoboda
 
-### 133\. The value of errno is referred to after a signal occurred other than as the result of calling the abort or raise function and the corresponding signal handler obtained a SIG\_ERR return from a call to the signal function (7.14.1.1).
+### 133\. The value of errno is referred to after a signal occurred other than as the result of calling the abort or raise function and the corresponding signal handler obtained a SIG\_ERR return from a call to the signal function (7.14.2.1).
 
 ``` c
 #include <signal.h>
@@ -2153,7 +2163,7 @@ Cite: CERT C Rule ERR32-C 1st NCCE 13.2.1
 
 Reviewers: svoboda
 
-### 134\. A signal is generated by an asynchronous signal handler (7.14.1.1).
+### 134\. A signal is generated by an asynchronous signal handler (7.14.2.1).
 
 ``` c
 #include <setjmp.h>
@@ -2213,7 +2223,7 @@ Cite: CERT C Rule SIG30-C 2nd NCCE 12.1.3
 
 Reviewers: svoboda
 
-### 135\. The signal function is used in a multi-threaded program (7.14.1.1).
+### 135\. The signal function is used in a multi-threaded program (7.14.2.1).
 
 ``` c
 #include <signal.h>
@@ -2250,7 +2260,7 @@ Cite: CERT C Rule CON37-C 1st NCCE 14.8.1
 
 Reviewers: svoboda
 
-### 136\. A function with a variable number of arguments attempts to access its varying arguments other than through a properly declared and initialized va\_list object, or before the va\_start macro is invoked (7.16, 7.16.1.1, 7.16.1.4).
+### 136\. A function with a variable number of arguments attempts to access its varying arguments other than through a properly declared and initialized va\_list object, or before the va\_start macro is invoked (7.16, 7.16.2.2, 7.16.2.5).
 
 ``` c
 #include <stdio.h>
@@ -2300,7 +2310,7 @@ int main(void) {
 
 Reviewers: svoboda, j.myers
 
-### 138\. A macro definition of va\_start, va\_arg, va\_copy, or va\_end is suppressed to access an actual function, or the program defines an external identifier with the name va\_copy or va\_end (7.16.1).
+### 138\. A macro definition of va\_start, va\_arg, va\_copy, or va\_end is suppressed to access an actual function, or the program defines an external identifier with the name va\_copy or va\_end (7.16.2).
 
 ``` c
 #include <stdarg.h>
@@ -2315,7 +2325,7 @@ int va_arg(void) {
 
 Reviewers: svoboda
 
-### 139\. The va\_start or va\_copy macro is invoked without a corresponding invocation of the va\_end macro in the same function, or vice versa (7.16.1, 7.16.1.2, 7.16.1.3, 7.16.1.4).
+### 139\. The va\_start or va\_copy macro is invoked without a corresponding invocation of the va\_end macro in the same function, or vice versa (7.16.2, 7.16.2.3, 7.16.2.4, 7.16.2.5).
 
 ``` c
 #include <stdarg.h>
@@ -2329,7 +2339,7 @@ void f(int last, ...) {
 
 Reviewers: svoboda, j.myers
 
-### 140\. The va\_arg macro is invoked when there is no actual next argument, or with a specified type that is not compatible with the promoted type of the actual next argument, with certain exceptions (7.16.1.1).
+### 140\. The va\_arg macro is invoked when there is no actual next argument, or with a specified type that is not compatible with the promoted type of the actual next argument, with certain exceptions (7.16.2.2).
 
 ``` c
 enum { va_eol = -1 };
@@ -2361,7 +2371,7 @@ CERT C Rule MSC39-C 1st NCCE 15.6.1
 
 Reviewers: svoboda
 
-### 141\. The type parameter to the va\_arg macro does not name an object type (7.16.1.1).
+### 141\. The type parameter to the va\_arg macro does not name an object type (7.16.2.2).
 
 HYPOTHETICAL COMPILABLE EXAMPLE? (ideally one that replaces a with a function pointer example)
 
@@ -2389,7 +2399,7 @@ void my_printf(const char *prefix, ...) {
 
 Reviewers: svoboda, UBSG
 
-### 142\. Using a null pointer constant in form of an integer expression as an argument to a ... function and then interpreting it as a void \* or char \* (7.16.1.1).
+### 142\. Using a null pointer constant in form of an integer expression as an argument to a ... function and then interpreting it as a void \* or char \* (7.16.2.2).
 
 ``` c
  #include <stdarg.h>
@@ -2427,7 +2437,7 @@ CERT C Rule MSC39-C 1st NCCE 15.6.1
 
 Reviewers: svoboda
 
-### 143\. The va\_copy or va\_start macro is invoked to initialize a va\_list that was previously initialized by either macro without an intervening invocation of the va\_end macro for the same va\_list (7.16.1.2, 7.16.1.4).
+### 143\. The va\_copy or va\_start macro is invoked to initialize a va\_list that was previously initialized by either macro without an intervening invocation of the va\_end macro for the same va\_list (7.16.2.3, 7.16.2.5).
 
 ``` c
 #include <stdarg.h>
@@ -2442,7 +2452,7 @@ void f(int last, ...) {
 
 Reviewers: svoboda, j.myers
 
-### 144\. The va\_start macro is invoked with additional arguments that include unbalanced parentheses, or unrecognized preprocessing tokens (7.16.1.4).
+### 144\. The va\_start macro is invoked with additional arguments that include unbalanced parentheses, or unrecognized preprocessing tokens (7.16.2.5).
 
 HYPOTHETICAL COMPILABLE EXAMPLE?
 
@@ -2483,7 +2493,7 @@ This was meant to be for a structure or union defined in offsetof, and also note
 
 Reviewers: svoboda
 
-### 147\. When program execution reaches an unreachable() macro invocation (7.21.1).
+### 147\. When program execution reaches an unreachable() macro invocation (7.21.2).
 
 ``` c
 if (x == 0) {
@@ -2493,7 +2503,7 @@ if (x == 0) {
 
 Reviewers: svoboda
 
-### 148\. Arbitrarily copying or changing the bytes of or copying from a non-null pointer into a nullptr\_t object and then reading that object (7.21.2).
+### 148\. Arbitrarily copying or changing the bytes of or copying from a non-null pointer into a nullptr\_t object and then reading that object (7.21.3).
 
 ``` c
 int i = 1;
@@ -2520,7 +2530,7 @@ size_t z = offsetof( binary_s, num3);   // Undefined Behavior, should be num2
 
 Reviewers: svoboda, myers
 
-### 150\. The argument in an instance of one of the integer-constant macros is not a decimal, octal, or hexadecimal constant, or it has a value that exceeds the limits for the corresponding type (7.22.4).
+### 150\. The argument in an instance of one of the integer-constant macros is not a decimal, octal, or hexadecimal constant, or it has a value that exceeds the limits for the corresponding type (7.22.5).
 
 ``` c
 unsigned char i = UINT8_C(0x123); // Undefined Behavior, 0x123 > 2^8
@@ -2644,7 +2654,7 @@ putchar(buf[0]);  // Undefined Behavior
 
 Reviewers: svoboda, j.myers, chrisbazley
 
-### 158\. There are insufficient arguments for the format in a call to one of the formatted input/output functions, or an argument does not have an appropriate type (7.23.6.1, 7.23.6.2, 7.31.2.1, 7.31.2.2).
+### 158\. There are insufficient arguments for the format in a call to one of the formatted input/output functions, or an argument does not have an appropriate type (7.23.6.2, 7.23.6.3, 7.31.2.2, 7.31.2.3).
 
 ``` c
 void f(void) {
@@ -2659,7 +2669,7 @@ Cite: TS17961 5.45 \[invfmtstr\] EXAMPLE, CERT C Rec DCL10-C 2nd NCCE
 
 Reviewers: svoboda
 
-### 159\. The format in a call to one of the formatted input/output functions or to the strftime or wcsftime function is not a valid multibyte character sequence that begins and ends in its initial shift state (7.23.6.1, 7.23.6.2, 7.29.3.5, 7.31.2.1, 7.31.2.2, 7.31.5.1).
+### 159\. The format in a call to one of the formatted input/output functions or to the strftime or wcsftime function is not a valid multibyte character sequence that begins and ends in its initial shift state (7.23.6.2, 7.23.6.3, 7.29.3.6, 7.31.2.2, 7.31.2.3, 7.31.5.1).
 
 ``` c
 #include <stdio.h>
@@ -2674,7 +2684,7 @@ printf(s);   // Undefined Behavior in UTF-8 locale
 
 Reviewers: svoboda, UBSG, j.myers
 
-### 160\. In a call to one of the formatted output functions, a precision appears with a conversion specifier other than those described (7.23.6.1, 7.31.2.1).
+### 160\. In a call to one of the formatted output functions, a precision appears with a conversion specifier other than those described (7.23.6.2, 7.31.2.2).
 
 ``` c
 #include <stdio.h>
@@ -2686,7 +2696,7 @@ void f(char c) {
 
 Reviewers: svoboda, j.myers
 
-### 161\. A conversion specification for a formatted output function uses an asterisk to denote an argument-supplied field width or precision, but the corresponding argument is not provided (7.23.6.1, 7.31.2.1).
+### 161\. A conversion specification for a formatted output function uses an asterisk to denote an argument-supplied field width or precision, but the corresponding argument is not provided (7.23.6.2, 7.31.2.2).
 
 ``` c
 #include <stdio.h>
@@ -2698,7 +2708,7 @@ void f(int i) {
 
 Reviewers: svoboda, j.myers
 
-### 162\. A conversion specification for a formatted output function uses a # or 0 flag with a conversion specifier other than those described (7.23.6.1, 7.31.2.1).
+### 162\. A conversion specification for a formatted output function uses a # or 0 flag with a conversion specifier other than those described (7.23.6.2, 7.31.2.2).
 
 ``` c
 #include <stdio.h>
@@ -2710,7 +2720,7 @@ void f(char *s) {
 
 Reviewers: svoboda, j.myers
 
-### 163\. A conversion specification for one of the formatted input/output functions uses a length modifier with a conversion specifier other than those described (7.23.6.1, 7.23.6.2, 7.31.2.1, 7.31.2.2).
+### 163\. A conversion specification for one of the formatted input/output functions uses a length modifier with a conversion specifier other than those described (7.23.6.2, 7.23.6.3, 7.31.2.2, 7.31.2.3).
 
 ``` c
 #include <stdio.h>
@@ -2722,7 +2732,7 @@ void f(int *pi) {
 
 Reviewers: svoboda, j.myers
 
-### 164\. An s conversion specifier is encountered by one of the formatted output functions, and the argument is missing the null terminator (unless a precision is specified that does not require null termination) (7.23.6.1, 7.31.2.1).
+### 164\. An s conversion specifier is encountered by one of the formatted output functions, and the argument is missing the null terminator (unless a precision is specified that does not require null termination) (7.23.6.2, 7.31.2.2).
 
 ``` c
 char str[3] = "abc";  // str not null-terminated!
@@ -2733,7 +2743,7 @@ Cite: TS17961 5.31 \[nonnullcs\] EXAMPLE 1
 
 Reviewers: svoboda
 
-### 165\. An n conversion specification for one of the formatted input/output functions includes any flags, an assignment-suppressing character, a field width, or a precision (7.23.6.1, 7.23.6.2, 7.31.2.1, 7.31.2.2).
+### 165\. An n conversion specification for one of the formatted input/output functions includes any flags, an assignment-suppressing character, a field width, or a precision (7.23.6.2, 7.23.6.3, 7.31.2.2, 7.31.2.3).
 
 ``` c
 #include <stdio.h>
@@ -2745,7 +2755,7 @@ void f(int *pi) {
 
 Reviewers: svoboda, j.myers
 
-### 166\. A % conversion specifier is encountered by one of the formatted input/output functions, but the complete conversion specification is not exactly %% (7.23.6.1, 7.23.6.2, 7.31.2.1, 7.31.2.2).
+### 166\. A % conversion specifier is encountered by one of the formatted input/output functions, but the complete conversion specification is not exactly %% (7.23.6.2, 7.23.6.3, 7.31.2.2, 7.31.2.3).
 
 ``` c
 #include <stdio.h>
@@ -2757,7 +2767,7 @@ void f(void) {
 
 Reviewers: svoboda, j.myers
 
-### 167\. An invalid conversion specification is found in the format for one of the formatted input/output functions, or the strftime or wcsftime function (7.23.6.1, 7.23.6.2, 7.29.3.5, 7.31.2.1, 7.31.2.2, 7.31.5.1).
+### 167\. An invalid conversion specification is found in the format for one of the formatted input/output functions, or the strftime or wcsftime function (7.23.6.2, 7.23.6.3, 7.29.3.6, 7.31.2.2, 7.31.2.3, 7.31.5.1).
 
 ``` c
 #include <stdio.h>
@@ -2769,7 +2779,7 @@ void f(int i) {
 
 Reviewers: svoboda, j.myers
 
-### 168\. The number of characters or wide characters transmitted by a formatted output function (or written to an array, or that would have been written to an array) is greater than INT\_MAX (7.23.6.1, 7.31.2.1).
+### 168\. The number of characters or wide characters transmitted by a formatted output function (or written to an array, or that would have been written to an array) is greater than INT\_MAX (7.23.6.2, 7.31.2.2).
 
 ``` c
 #include <stdio.h>
@@ -2784,7 +2794,7 @@ int f(int i) {
 
 Reviewers: svoboda, j.myers
 
-### 169\. The number of input items assigned by a formatted input function is greater than INT\_MAX (7.23.6.2, 7.31.2.2).
+### 169\. The number of input items assigned by a formatted input function is greater than INT\_MAX (7.23.6.3, 7.31.2.3).
 
 ``` c
 #include <stdio.h>
@@ -2812,7 +2822,7 @@ void f(int unused, ...) {
 
 Reviewers: svoboda
 
-### 170\. The result of a conversion by one of the formatted input functions cannot be represented in the corresponding object, or the receiving object does not have an appropriate type (7.23.6.2, 7.31.2.2).
+### 170\. The result of a conversion by one of the formatted input functions cannot be represented in the corresponding object, or the receiving object does not have an appropriate type (7.23.6.3, 7.31.2.3).
 
 ``` c
 long num_long;
@@ -2826,7 +2836,7 @@ Cite: CERT C Rec INT05-C 1st NCCE
 
 Reviewers: svoboda
 
-### 171\. A c, s, or \[ conversion specifier is encountered by one of the formatted input functions, and the array pointed to by the corresponding argument is not large enough to accept the input sequence (and a null terminator if the conversion specifier is s or \[) (7.23.6.2, 7.31.2.2).
+### 171\. A c, s, or \[ conversion specifier is encountered by one of the formatted input functions, and the array pointed to by the corresponding argument is not large enough to accept the input sequence (and a null terminator if the conversion specifier is s or \[) (7.23.6.3, 7.31.2.3).
 
 ``` c
 char buf[BUF_LENGTH];
@@ -2837,7 +2847,7 @@ Cite: TS17961 5.40 \[taintformatio\] EXAMPLE 1
 
 Reviewers: svoboda
 
-### 172\. A c, s, or \[ conversion specifier with an l qualifier is encountered by one of the formatted input functions, but the input is not a valid multibyte character sequence that begins in the initial shift state (7.23.6.2, 7.31.2.2).
+### 172\. A c, s, or \[ conversion specifier with an l qualifier is encountered by one of the formatted input functions, but the input is not a valid multibyte character sequence that begins in the initial shift state (7.23.6.3, 7.31.2.3).
 
 ``` c
 #include <stdio.h>
@@ -2864,7 +2874,7 @@ sscanf( addr, "%p", &ptr);  // Undefined Behavior
 
 Reviewers: svoboda, j.myers
 
-### 174\. The vfprintf, vfscanf, vprintf, vscanf, vsnprintf, vsprintf, vsscanf, vfwprintf, vfwscanf, vswprintf, vswscanf, vwprintf, or vwscanf function is called with an improperly initialized va\_list argument, or the argument is used (other than in an invocation of va\_end) after the function returns (7.23.6.8, 7.23.6.9, 7.23.6.10, 7.23.6.11, 7.23.6.12, 7.23.6.13, 7.23.6.14, 7.31.2.5, 7.31.2.6, 7.31.2.7, 7.31.2.8, 7.31.2.9, 7.31.2.10).
+### 174\. The vfprintf, vfscanf, vprintf, vscanf, vsnprintf, vsprintf, vsscanf, vfwprintf, vfwscanf, vswprintf, vswscanf, vwprintf, or vwscanf function is called with an improperly initialized va\_list argument, or the argument is used (other than in an invocation of va\_end) after the function returns (7.23.6.9, 7.23.6.10, 7.23.6.11, 7.23.6.12, 7.23.6.13, 7.23.6.14, 7.23.6.15, 7.31.2.6, 7.31.2.7, 7.31.2.8, 7.31.2.9, 7.31.2.10, 7.31.2.11).
 
 ``` c
 #include <stdio.h>
@@ -3003,7 +3013,7 @@ Cite: TS17961 5.41 \[xfilepos\] EXAMPLE
 
 Reviewers: svoboda
 
-### 182\. A non-null pointer returned by a call to the calloc, malloc, realloc, or aligned\_alloc function with a zero requested size is used to access an object (7.24.3).
+### 182\. A non-null pointer returned by a call to the calloc, malloc, realloc, or aligned\_alloc function with a zero requested size is used to access an object (7.24.4).
 
 ``` c
 #include <stdlib.h>
@@ -3017,7 +3027,7 @@ array[0] = 123;  // Undefined Behavior, out-of-bounds write
 
 Reviewers: svoboda, j.myers
 
-### 183\. The value of a pointer that refers to space deallocated by a call to the free or realloc function is used (7.24.3).
+### 183\. The value of a pointer that refers to space deallocated by a call to the free or realloc function is used (7.24.4).
 
 ``` c
 struct List { struct List *next; // ... };
@@ -3033,7 +3043,7 @@ Cite: TS17961 5.2 \[accfree\] EXAMPLE 1,2,3
 
 Reviewers: svoboda
 
-### 184\. The pointer argument to the free or realloc function is unequal to a null pointer and does not match a pointer earlier returned by a memory management function, or the space has been deallocated by a call to free or realloc (7.24.3.3, 7.24.3.7).
+### 184\. The pointer argument to the free or realloc function is unequal to a null pointer and does not match a pointer earlier returned by a memory management function, or the space has been deallocated by a call to free or realloc (7.24.4.4, 7.24.4.8).
 
 ``` c
 void f(size_t num_elem) {
@@ -3058,7 +3068,7 @@ Cite: TS17961 5.34 \[xfree\] EXAMPLE 1, 2
 
 Reviewers: svoboda
 
-### 185\. The value of the object allocated by the malloc function is used (7.24.3.6).
+### 185\. The value of the object allocated by the malloc function is used (7.24.4.7).
 
 ``` c
 #include <stdio.h>
@@ -3072,7 +3082,7 @@ if (p != NULL) {
 
 Reviewers: svoboda, j.myers
 
-### 186\. The values of any bytes in a new object allocated by the realloc function beyond the size of the old object are used (7.24.3.7).
+### 186\. The values of any bytes in a new object allocated by the realloc function beyond the size of the old object are used (7.24.4.8).
 
 ``` c
 #include <stdlib.h>
@@ -3119,7 +3129,7 @@ Cite: CERT C Rule EXP33-C 5th NCCE 4.3.11
 
 Reviewers: svoboda
 
-### 187\. The program calls the exit or quick\_exit function more than once, or calls both functions (7.24.4.4, 7.24.4.7).
+### 187\. The program calls the exit or quick\_exit function more than once, or calls both functions (7.24.5.4, 7.24.5.7).
 
 ``` c
 #include <stdlib.h>
@@ -3154,7 +3164,7 @@ Cite: CERT C Rule ENV32-C 1st NCCE 11.3.1
 
 Reviewers: svoboda
 
-### 188\. During the call to a function registered with the atexit or at\_quick\_exit function, a call is made to the longjmp function that would terminate the call to the registered function (7.24.4.4, 7.24.4.7).
+### 188\. During the call to a function registered with the atexit or at\_quick\_exit function, a call is made to the longjmp function that would terminate the call to the registered function (7.24.5.4, 7.24.5.7).
 
 ``` c
 #include <stdlib.h>
@@ -3183,7 +3193,7 @@ Cite: CERT C Rule ENV32-C 2nd NCCE 11.3.3
 
 Reviewers: svoboda
 
-### 189\. The string set up by the getenv or strerror function is modified by the program (7.24.4.6, 7.26.6.3).
+### 189\. The string set up by the getenv or strerror function is modified by the program (7.24.5.6, 7.26.6.3).
 
 ``` c
 void f3(void) {
@@ -3203,7 +3213,7 @@ Cite: TS17961 5.29 \[libmod\] EXAMPLE 3, 4
 
 Reviewers: svoboda
 
-### 190\. A signal is raised while the quick\_exit function is executing (7.24.4.7).
+### 190\. A signal is raised while the quick\_exit function is executing (7.24.5.7).
 
 ``` c
 void exit_handler(void) {
@@ -3221,7 +3231,7 @@ int main(void) {
 
 Reviewers: svoboda
 
-### 191\. A command is executed through the system function in a way that is documented as causing termination or some other form of undefined behavior (7.24.4.8).
+### 191\. A command is executed through the system function in a way that is documented as causing termination or some other form of undefined behavior (7.24.5.8).
 
 HYPOTHETICAL COMPILABLE EXAMPLE?
 
@@ -3231,7 +3241,7 @@ int retval = system("ls /missing");   // Undefined Behavior
 
 Reviewers: svoboda
 
-### 192\. A searching or sorting utility function is called with an invalid pointer argument, even if the number of elements is zero (7.24.5).
+### 192\. A searching or sorting utility function is called with an invalid pointer argument, even if the number of elements is zero (7.24.6).
 
 ``` c
 #include <stdlib.h>
@@ -3246,7 +3256,7 @@ qsort(arr, 0, sizeof(int), compare);  // Undefined Behavior
 
 Reviewers: coates, svoboda
 
-### 193\. The comparison function called by a searching or sorting utility function alters the contents of the array being searched or sorted, or returns ordering values inconsistently (7.24.5).
+### 193\. The comparison function called by a searching or sorting utility function alters the contents of the array being searched or sorted, or returns ordering values inconsistently (7.24.6).
 
 ``` c
 #include <stdlib.h>
@@ -3263,7 +3273,7 @@ qsort(arr, n, sizeof(int), compare);  // Undefined Behavior
 
 Reviewers: coates, svoboda
 
-### 194\. The array being searched by the bsearch function does not have its elements in proper order (7.24.5.1).
+### 194\. The array being searched by the bsearch function does not have its elements in proper order (7.24.6.2).
 
 ``` c
 int compare(const void *a, const void *b) {
@@ -3279,7 +3289,7 @@ int *result = (int *)bsearch(&key, arr, n, sizeof(int), compare);
 
 Reviewers: svoboda
 
-### 195\. The current conversion state is used by a multibyte/wide character conversion function after changing the LC\_CTYPE category (7.24.7).
+### 195\. The current conversion state is used by a multibyte/wide character conversion function after changing the LC\_CTYPE category (7.24.8).
 
 EXAMPLE: fscanf() is defined in C23 s7.23.6.2. Example 6, (paragraph 23) in this section describes a hypothetical encoding with shift states, which we will use for this example:
 
@@ -3333,7 +3343,7 @@ int length = strlen(c); // Undefined Behavior
 
 Reviewers: svoboda, j.myers
 
-### 198\. The contents of the destination array are used after a call to the strxfrm, strftime, wcsxfrm, or wcsftime function in which the specified length was too small to hold the entire null-terminated result (7.26.4.5, 7.29.3.5, 7.31.4.4.4, 7.31.5.1).
+### 198\. The contents of the destination array are used after a call to the strxfrm, strftime, wcsxfrm, or wcsftime function in which the specified length was too small to hold the entire null-terminated result (7.26.4.6, 7.29.3.6, 7.31.4.5.5, 7.31.5.1).
 
 ``` c
 char src[] = "This is a test";
@@ -3374,7 +3384,7 @@ if (thrd_success != thrd_join(thr, &retval)) {
 
 Reviewers: svoboda, CliveP, robin-rowe, j.myers
 
-### 200\. The first argument in the very first call to the strtok or wcstok is a null pointer (7.26.5.9, 7.31.4.5.8).
+### 200\. The first argument in the very first call to the strtok or wcstok is a null pointer (7.26.5.9, 7.31.4.6.8).
 
 ``` c
 #include <string.h>
@@ -3457,7 +3467,7 @@ double result = ddiv(d64, d);   // Undefined Behavior
 
 Reviewers: svoboda
 
-### 208\. A non-recursive mutex passed to mtx\_lock is locked by the calling thread (7.28.4.3).
+### 208\. A non-recursive mutex passed to mtx\_lock is locked by the calling thread (7.28.4.4).
 
 ``` c
 #include <threads.h>
@@ -3480,7 +3490,7 @@ mtx_destroy(&m);
 
 Reviewers: svoboda, j.myers
 
-### 209\. The mutex passed to mtx\_timedlock does not support timeout (7.28.4.4).
+### 209\. The mutex passed to mtx\_timedlock does not support timeout (7.28.4.5).
 
 ``` c
 #include <threads.h>
@@ -3506,7 +3516,7 @@ mtx_destroy(&m);
 
 Reviewers: svoboda, j.myers
 
-### 210\. The mutex passed to mtx\_unlock is not locked by the calling thread (7.28.4.6).
+### 210\. The mutex passed to mtx\_unlock is not locked by the calling thread (7.28.4.7).
 
 ``` c
 #include <threads.h>
@@ -3664,7 +3674,7 @@ int main(void) {
 
 Reviewers: svoboda
 
-### 215\. At least one member of the broken-down time passed to asctime contains a value outside its normal range, or the calculated year exceeds four digits or is less than the year 1000 (7.29.3.1).
+### 215\. At least one member of the broken-down time passed to asctime contains a value outside its normal range, or the calculated year exceeds four digits or is less than the year 1000 (7.29.3.2).
 
 ``` c
 #include <time.h>
@@ -3680,7 +3690,7 @@ Cite: CERT C Rule MSC33-C 1st NCCE 15.3.1
 
 Reviewers: svoboda
 
-### 216\. The argument corresponding to an s specifier without an l qualifier in a call to the fwprintf function does not point to a valid multibyte character sequence that begins in the initial shift state (7.31.2.11).
+### 216\. The argument corresponding to an s specifier without an l qualifier in a call to the fwprintf function does not point to a valid multibyte character sequence that begins in the initial shift state (7.31.2.12).
 
 ``` c
 #include <wchar.h>
@@ -3695,7 +3705,7 @@ fwprintf(stdout, L"The string is %s\n", invalid);
 
 Reviewers: svoboda, j.myers
 
-### 217\. In a call to the wcstok function, the object pointed to by ptr does not have the value stored by the previous call for the same wide string (7.31.4.5.8).
+### 217\. In a call to the wcstok function, the object pointed to by ptr does not have the value stored by the previous call for the same wide string (7.31.4.6.8).
 
 ``` c
 #include <wchar.h>
@@ -3742,7 +3752,7 @@ int main(void) {
 
 Reviewers: svoboda, j.myers
 
-### 220\. The iswctype function is called using a different LC\_CTYPE category from the one in effect for the call to the wctype function that returned the description (7.32.2.2.1).
+### 220\. The iswctype function is called using a different LC\_CTYPE category from the one in effect for the call to the wctype function that returned the description (7.32.2.3.2).
 
 See UB 191 for background on LC\_CTYPE categories. (editor; UB 191 of which version?)
 
@@ -3759,7 +3769,7 @@ int f(wint_t wc) {
 
 Reviewers: svoboda, j.myers
 
-### 221\. The towctrans function is called using a different LC\_CTYPE category from the one in effect for the call to the wctrans function that returned the description (7.32.3.2.1).
+### 221\. The towctrans function is called using a different LC\_CTYPE category from the one in effect for the call to the wctrans function that returned the description (7.32.3.2.2).
 
 ``` c
 #include <wchar.h>
