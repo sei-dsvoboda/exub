@@ -1251,40 +1251,13 @@ int main (void) {
 
 Reviewers: svoboda
 
----
-==**Deleted from ISO C23**==
-~~
-### 77\. A declaration for which a type is inferred contains a pointer, array, or function declarators (6.7.10).
-
-``` c
-double double_double(double x) {
-  return x * 2;
-}
-
-auto (*fn)(double x) = double_double; // Undefined Behavior
-```
-
-Reviewers: svoboda
-
-### 78\. A declaration for which a type is inferred contains no or more than one declarators (6.7.10).
-
-``` c
-auto i = 3, j = 4.5; // Undefined Behavior
-```
-
-Reviewers: svoboda
-~~
----
-
-### 79\. The value of an unnamed member of a structure or union is used (6.7.11).
+### 77\. The value of an unnamed member of a structure or union is used (6.7.11).
 
 TODO
 
 Reviewers:
 
-~~Note: Removed from J.2. by [N3245](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3345.pdf)~~
-
-### 80\. The initializer for a scalar is neither a single expression, an empty initializer, nor a single expression enclosed in braces (6.7.11).
+### 78\. The initializer for a scalar is neither a single expression, an empty initializer, nor a single expression enclosed in braces (6.7.11).
 
 TODO
 
@@ -1292,7 +1265,7 @@ Reviewers:
 
 Note: Removed from J.2. by [N3246](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3346.pdf)
 
-### 81\. The initializer for a structure or union object is neither an initializer list nor a single expression that has compatible structure or union type (6.7.11).
+### 79\. The initializer for a structure or union object is neither an initializer list nor a single expression that has compatible structure or union type (6.7.11).
 
 TODO
 
@@ -1300,7 +1273,7 @@ Reviewers:
 
 Note: Removed from J.2. by [N3246](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3346.pdf)
 
-### 82\. The initializer for an aggregate or union, other than an array initialized by a string literal, is not a brace-enclosed list of initializers for its elements or members (6.7.11).
+### 80\. The initializer for an aggregate or union, other than an array initialized by a string literal, is not a brace-enclosed list of initializers for its elements or members (6.7.11).
 
 This UB has been eliminated by [N3346](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3346.pdf).
 
@@ -1316,7 +1289,7 @@ struct st s = 0;   // Undefined Behavior
 
 Reviewers: svoboda
 
-### 83\. A function definition that does not have the asserted property is called by a function declaration or a function pointer with a type that has the unsequenced or reproducible attribute (6.7.13.8).
+### 81\. A function definition that does not have the asserted property is called by a function declaration or a function pointer with a type that has the unsequenced or reproducible attribute (6.7.13.8).
 
 ``` c
 int next(int *ip) [[reproducible]] {
@@ -1330,7 +1303,7 @@ Cite: CERT C Rule DCL42-C 1st NCCE
 
 Reviewers: svoboda
 
-### 84\. An identifier with external linkage is used, but in the program there does not exist exactly one external definition for the identifier, or the identifier is not used and there exist multiple external definitions for the identifier (6.9).
+### 82\. An identifier with external linkage is used, but in the program there does not exist exactly one external definition for the identifier, or the identifier is not used and there exist multiple external definitions for the identifier (6.9).
 
 ``` c
 extern int x;
@@ -1341,7 +1314,7 @@ printf("x is %d!\n", x);
 
 Reviewers: svoboda
 
-### 85\. A function that accepts a variable number of arguments is defined without a parameter type list that ends with the ellipsis notation (6.9.2).
+### 83\. A function that accepts a variable number of arguments is defined without a parameter type list that ends with the ellipsis notation (6.9.2).
 
 ``` c
 // In file1.c:
@@ -1364,7 +1337,7 @@ int main (void) {
 
 Reviewers: svoboda
 
-### 86\. The } that terminates a function is reached, and the value of the function call is used by the caller (6.9.2).
+### 84\. The } that terminates a function is reached, and the value of the function call is used by the caller (6.9.2).
 
 ``` c
 #include <string.h>
@@ -1388,7 +1361,7 @@ Cite: CERT C Rule MSC37-C 1st NCCE 15.4.1, 2nd NCCE 15.4.3, 3rd NCCE 15.4.3.1
 
 Reviewers: svoboda
 
-### 87\. An identifier for an object with internal linkage and an incomplete type is declared with a tentative definition (6.9.3).
+### 85\. An identifier for an object with internal linkage and an incomplete type is declared with a tentative definition (6.9.3).
 
 TODO
 
@@ -1396,7 +1369,7 @@ Reviewers:
 
 Note: Removed from J.2. by [N3347](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3347.pdf)
 
-### 88\. A non-directive preprocessing directive is executed (6.10).
+### 86\. A non-directive preprocessing directive is executed (6.10).
 
 ``` c
 # 1234
@@ -1405,7 +1378,7 @@ Note: Removed from J.2. by [N3347](https://www.open-std.org/jtc1/sc22/wg14/www/d
 
 Reviewers: svoboda
 
-### 89\. The token defined is generated during the expansion of a #if or #elif preprocessing directive, or the use of the defined unary operator does not match one of the two specified forms prior to macro replacement (6.10.2).
+### 87\. The token defined is generated during the expansion of a #if or #elif preprocessing directive, or the use of the defined unary operator does not match one of the two specified forms prior to macro replacement (6.10.2).
 
 ``` c
 #define FOO 1
@@ -1418,7 +1391,7 @@ Reviewers: svoboda
 
 Reviewers: svoboda
 
-### 90\. The #include preprocessing directive that results after expansion does not match one of the two header name forms (6.10.3).
+### 88\. The #include preprocessing directive that results after expansion does not match one of the two header name forms (6.10.3).
 
 EXTENDED COMPILABLE EXAMPLE: Consider a platform that allows prefix and suffix commands associated with the inclusion of a file.
 
@@ -1429,19 +1402,22 @@ EXTENDED COMPILABLE EXAMPLE: Consider a platform that allows prefix and suffix c
 
 Reviewers: svoboda, gustedt
 
-### *89\.The #embed preprocessing directive that results after expansion does not match any of the name forms (6.10.4).*
+### 89\. The #embed preprocessing directive that results after expansion does not match any of the name forms (6.10.4).
 ** NEW **
+Reviewers:
 
-### 91\. The character sequence in an #include preprocessing directive does not start with a letter (6.10.3).
+### 90\. The character sequence in an #include preprocessing directive does not start with a letter (6.10.3).
 
 ``` c
 #include "2file.h"
 // Undefined Behavior
 ```
 
-### *91\. The character sequence in an #embed preprocessing directive does not start with a letter (6.10.4).*
-
 Reviewers: svoboda
+
+### 91\. The character sequence in an #embed preprocessing directive does not start with a letter (6.10.4).
+** NEW **
+Reviewers:
 
 ### 92\. There are sequences of preprocessing tokens within the list of macro arguments that would otherwise act as preprocessing directives (6.10.5).
 
