@@ -84,7 +84,7 @@ int main(float argc) {  // Undefined Behavior
 
 Reviewers: s.maddanimath, svoboda, UBSG, j.myers
 
-### 5\. The execution of a program contains a data race (5.2.2.5).
+### 5\. The execution of a program contains a data race (5.1.2.5).
 
 ``` c
 #include <stdatomic.h>
