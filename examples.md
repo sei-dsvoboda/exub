@@ -1403,7 +1403,9 @@ EXTENDED COMPILABLE EXAMPLE: Consider a platform that allows prefix and suffix c
 Reviewers: svoboda, gustedt
 
 ### 89\. The #embed preprocessing directive that results after expansion does not match any of the name forms (6.10.4).
-** NEW **
+
+TODO
+
 Reviewers:
 
 ### 90\. The character sequence in an #include preprocessing directive does not start with a letter (6.10.3).
@@ -1416,7 +1418,9 @@ Reviewers:
 Reviewers: svoboda
 
 ### 91\. The character sequence in an #embed preprocessing directive does not start with a letter (6.10.4).
-** NEW **
+
+TODO
+
 Reviewers:
 
 ### 92\. There are sequences of preprocessing tokens within the list of macro arguments that would otherwise act as preprocessing directives (6.10.5).
