@@ -864,8 +864,6 @@ Reviewers: svoboda
 
 ### 52\. An expression that is required to be an integer constant expression does not have an integer type; has operands that are not integer constants, named constants, compound literal constants, enumeration constants, character constants, predefined constants, sizeof expressions whose results are integer constants, alignof expressions, or immediately-cast floating constants; or contains casts (outside operands to sizeof and alignof operators) other than conversions of arithmetic types to integer types (6.6).
 
-This UB has been eliminated by [N3558](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3558.htm).
-
 EXTENDED COMPILABLE EXAMPLE: Consider a platform that accepts floating-point constants to be used in constant integer expressions.
 
 ``` c
@@ -884,9 +882,9 @@ struct s {
 
 Reviewers: svoboda
 
-### 53\. A constant expression in an initializer is not, or does not evaluate to, one of the following: a named constant, a compound literal constant, an arithmetic constant expression, a null pointer constant, an address constant, or an address constant for a complete object type plus or minus an integer constant expression (6.6).
+Note: This UB has been eliminated by [N3558](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3558.htm).
 
-This UB has been eliminated by [N3558](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3558.htm).
+### 53\. A constant expression in an initializer is not, or does not evaluate to, one of the following: a named constant, a compound literal constant, an arithmetic constant expression, a null pointer constant, an address constant, or an address constant for a complete object type plus or minus an integer constant expression (6.6).
 
 EXTENDED COMPILABLE EXAMPLE: Consider a platform that allows function calls to be used in constant integer expressions.
 
@@ -910,9 +908,9 @@ struct s {
 
 Reviewers: svoboda
 
-### 54\. An arithmetic constant expression does not have arithmetic type; has operands that are not integer constants, floating constants, named and compound literal constants of arithmetic type, character constants, predefined constants, sizeof expressions whose results are integer constants, or alignof expressions; or contains casts (outside operands to sizeof or alignof operators) other than conversions of arithmetic types to arithmetic types (6.6).
+Note: This UB has been eliminated by [N3558](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3558.htm).
 
-This UB has been eliminated by [N3558](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3558.htm).
+### 54\. An arithmetic constant expression does not have arithmetic type; has operands that are not integer constants, floating constants, named and compound literal constants of arithmetic type, character constants, predefined constants, sizeof expressions whose results are integer constants, or alignof expressions; or contains casts (outside operands to sizeof or alignof operators) other than conversions of arithmetic types to arithmetic types (6.6).
 
 EXTENDED COMPILABLE EXAMPLE: Consider a platform that allows string literals to be used in constant arithmetic expressions.
 
@@ -921,6 +919,8 @@ float f = "Hello, world!";   // Undefined Behavior
 ```
 
 Reviewers: svoboda
+
+Note: This UB has been eliminated by [N3558](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3558.htm).
 
 ### 55\. The value of an object is accessed by an array-subscript \[\], member-access . or ->, address &, or indirection \* operator or a pointer cast in creating an address constant (6.6).
 
@@ -933,19 +933,15 @@ Reviewers: svoboda
 
 ### 56\. An identifier for an object is declared with no linkage and the type of the object is incomplete after its declarator, or after its init-declarator if it has an initializer (6.7).
 
-TODO
-
 Reviewers:
 
-Note: Removed from J.2. by [N3244](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3244.pdf)
+Note: This UB has been eliminated by [N3244](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3244.pdf).
 
 ### 57\. A function is declared at block scope with an explicit storage-class specifier other than extern (6.7.2).
 
-TODO
-
 Reviewers:
 
-Note: Removed from J.2. by [N3244](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3244.pdf)
+Note: This UB has been eliminated by [N3244](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3244.pdf).
 
 ### 58\. A structure or union is defined without any named members (including those specified indirectly via anonymous structures and unions) (6.7.3.2).
 
@@ -995,11 +991,9 @@ Reviewers: svoboda
 
 ### 60\. When the complete type is needed, an incomplete structure or union type is not completed in the same scope by another declaration of the tag that defines the content (6.7.3.4).
 
-TODO
-
 Reviewers:
 
-Note: Removed from J.2. by [N3244](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3244.pdf)
+Note: This UB has been eliminated by [N3244](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3244.pdf).
 
 ### 61\. An attempt is made to modify an object defined with a const-qualified type through use of an lvalue with non-const-qualified type (6.7.4).
 
@@ -1133,11 +1127,9 @@ Reviewers: uecker, svoboda, j.myers
 
 ### 69\. The definition of an object has an alignment specifier and another declaration of that object has a different alignment specifier (6.7.6).
 
-TODO
-
 Reviewers:
 
-Note: Removed from J.2. by [N3244](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3244.pdf)
+Note: This UB has been eliminated by [N3244](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3244.pdf).
 
 ### 70\. Declarations of an object in different translation units have different alignment specifiers (6.7.6).
 
@@ -1253,29 +1245,23 @@ Reviewers: svoboda
 
 ### 77\. The value of an unnamed member of a structure or union is used (6.7.11).
 
-TODO
-
 Reviewers:
+
+Note: This UB has been eliminated by [N3245](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3245.pdf).
 
 ### 78\. The initializer for a scalar is neither a single expression, an empty initializer, nor a single expression enclosed in braces (6.7.11).
 
-TODO
-
 Reviewers:
 
-Note: Removed from J.2. by [N3246](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3346.pdf)
+Note: This UB has been eliminated by [N3246](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3346.pdf).
 
 ### 79\. The initializer for a structure or union object is neither an initializer list nor a single expression that has compatible structure or union type (6.7.11).
 
-TODO
-
 Reviewers:
 
-Note: Removed from J.2. by [N3246](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3346.pdf)
+Note: This UB has been eliminated by [N3246](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3346.pdf).
 
 ### 80\. The initializer for an aggregate or union, other than an array initialized by a string literal, is not a brace-enclosed list of initializers for its elements or members (6.7.11).
-
-This UB has been eliminated by [N3346](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3346.pdf).
 
 EXTENDED COMPILABLE EXAMPLE: Consider a platform that allows integer literals to be used in aggregate initializer expressions.
 
@@ -1288,6 +1274,8 @@ struct st s = 0;   // Undefined Behavior
 ```
 
 Reviewers: svoboda
+
+Note: This UB has been eliminated by [N3346](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3346.pdf).
 
 ### 81\. A function definition that does not have the asserted property is called by a function declaration or a function pointer with a type that has the unsequenced or reproducible attribute (6.7.13.8).
 
@@ -1363,11 +1351,9 @@ Reviewers: svoboda
 
 ### 85\. An identifier for an object with internal linkage and an incomplete type is declared with a tentative definition (6.9.3).
 
-TODO
-
 Reviewers:
 
-Note: Removed from J.2. by [N3347](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3347.pdf)
+Note: This UB has been eliminated by [N3347](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3347.pdf).
 
 ### 86\. A non-directive preprocessing directive is executed (6.10).
 
@@ -1404,9 +1390,18 @@ Reviewers: svoboda, gustedt
 
 ### 89\. The #embed preprocessing directive that results after expansion does not match any of the name forms (6.10.4).
 
-TODO
+EXTENDED COMPILABLE EXAMPLE: Consider a platform that allows prefix and suffix commands associated with the embeddingn of a file.
 
-Reviewers:
+``` c
+// Embed a text file and manually append a null-terminator
+const char message[] = {
+#embed "message.txt" prefix(define pro 25) suffix(undef pro)
+// Undefined Behavior
+, '\0'
+};
+```
+
+Reviewers: svoboda
 
 ### 90\. The character sequence in an #include preprocessing directive does not start with a letter (6.10.3).
 
@@ -1419,9 +1414,15 @@ Reviewers: svoboda
 
 ### 91\. The character sequence in an #embed preprocessing directive does not start with a letter (6.10.4).
 
-TODO
+``` c
+// Embed a text file and manually append a null-terminator
+const char message[] = {
+#embed "123message.txt"    // Undefined Behavior
+, '\0'
+};
+```
 
-Reviewers:
+Reviewers: svoboda
 
 ### 92\. There are sequences of preprocessing tokens within the list of macro arguments that would otherwise act as preprocessing directives (6.10.5).
 
@@ -2544,11 +2545,9 @@ Reviewers: svoboda, j.myers
 
 ### 152\. Use is made of any portion of a file beyond the most recent wide character written to a wide-oriented stream (7.23.2).
 
-TODO
-
 Reviewers:
 
-Note: Removed from J.2. by [N3064](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3064.pdf)
+Note: This UB has been eliminated by [N3064](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n3064.pdf).
 
 ### 153\. The value of a pointer to a FILE object is used after the associated file is closed (7.23.3).
 
