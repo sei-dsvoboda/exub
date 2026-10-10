@@ -1,15 +1,15 @@
-# Examples of Undefined Behavior for Annex J.2 in C23
-by David Svoboda <svoboda2sei.cmu.edu>
+---
+title: Examples of Undefined Behavior for Annex J.2 in C23
+---
+]by David Svoboda <svoboda@sei.cmu.edu>
+
+## Overview
 
 The paper was created by the Undefined Behavior Study Group, in hopes of publication.  We would therefore request a vote to form an editorial group to adjust this paper for eventual publication as a white paper.
 
-## Introduction
-
 For each undefined behavior, this document provides an example of code that demonstrates this undefined behavior.
 
-For most undefined behaviors, the example code strictly conforms to the Standard, except for the single undefined behavior. These code examples build executable code, although popular compilers may issue a warning.
-
-However, there are several undefined behaviors (#6 for one) for which we were unable to generate a code example that produces executable code using current compilers.  For these, we imagined that a compiler was extended to support an additional feature of the C language, and we then wrote the code for this hypothetical compiler.  These examples each are prefaced with "EXTENDED COMPILABLE EXAMPLE".
+For most undefined behaviors, the example code strictly conforms to the Standard, except for the single undefined behavior. These code examples build executable code, although popular compilers may issue a warning. However, there are several undefined behaviors (#6 for one) for which we were unable to generate a code example that produces executable code using current compilers.  For these, we imagined that a compiler was extended to support an additional feature of the C language, and we then wrote the code for this hypothetical compiler.  These examples each are prefaced with "EXTENDED COMPILABLE EXAMPLE".
 
 ## Format
 
