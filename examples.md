@@ -90,23 +90,21 @@ Reviewers: s.maddanimath, svoboda, UBSG, j.myers
 #include <stdatomic.h>
 #include <stdbool.h>
 
-static atomic_bool flag = ATOMIC_VAR_INIT(false);
+static _Bool flag;     // To eliminate undefined behavior, make this atomic
 
 void init_flag(void) {
-  atomic_init(&flag, false);
+  flag = false;
 }
 
-// This function uses only atomic reads & writes, so it has
-// no undefined behavior.
-// but it enables get_flag() to have undefined behavior.
+// This function has a data race in the access of flag
+// It also has a race condition in the read/modify/write sequence
+// that is independent of the data race.
 void toggle_flag(void) {
-  bool temp_flag = atomic_load(&flag);
-  temp_flag = !temp_flag;
-  atomic_store(&flag, temp_flag);
+  flag = !flag;        // Undefined Behavior: data race
 }
 
 bool get_flag(void) {
-  return flag;         // Undefined Behavior, non-atomic read
+  return flag;         // Undefined Behavior: data race
 }
 ```
 
