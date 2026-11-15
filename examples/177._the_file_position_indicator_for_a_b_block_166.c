@@ -4,4 +4,5 @@ if (f == NULL) {
 }
 assert(ftell( f) == 0);
 int c = 'A';
-c = ungetc( c, f);   // Undefined Behavior
+c = ungetc( c, f);
+printf("The file is now at position %lld\n", ftell(f));   // Undefined Behavior

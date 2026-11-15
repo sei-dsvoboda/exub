@@ -1,4 +1,4 @@
 #define sin int x;
 
-#include <stdio.h>
+#include <math.h>
 // Undefined Behavior, sin() already defined

@@ -1,9 +1,10 @@
 #include <stddef.h>
 #include <string.h>
+#include <wchar.h>
 
 void func(void) {
-  wchar_t wide_str1[] = L"0123456789";
-  wchar_t wide_str2[] = L"0000000000";
+  char str1[] = "0123456789";
+  char str2[] = "0000000000";
 
-  strncpy(wide_str2, wide_str1, 10);  // Undefined Behavior
+  wcsncpy(str2, str1, 10 * sizeof(wchar_t)); // Undefined Behavior
 }

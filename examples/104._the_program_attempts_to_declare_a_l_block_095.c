@@ -1,3 +1,4 @@
-#include <stddef.h>
+// Includes declaration: void *malloc(size_t size)
+#include <stdlib.h>
 
-static void *malloc(size_t nbytes); // Undefined Behavior
+static void *malloc(int nbytes); // Undefined Behavior: int vs size_t

@@ -1,4 +1,5 @@
 #include <string.h>
 
-char *c = 0;
-int length = strlen(c); // Undefined Behavior
+char str[] = "abc";
+char *p = &(str[4]);  // Valid as long as p is not dereferenced.
+strcmp(str, p); // Undefined Behavior

@@ -2,8 +2,9 @@
 #include <stdarg.h>
 
 void f(int first, ...) {
-  int local = 0;
   va_list args;
-  va_start( args, local);          // Oops, not first fixed arg!
-  vprintf("Hello, %s\n", args);    // Undefined Behavior
+  va_start( args);
+  vprintf("Hello, %s\n", args);
+  printf("First arg is %d\n", first);
+  printf("Remaining arg is %p\n", (void*) args); // Undefined Behavior
 }

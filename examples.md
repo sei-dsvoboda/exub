@@ -665,13 +665,13 @@ Reviewers: svoboda
 ``` c
 int init(void) {return -1;}
 
-int remainder(int x) {
+int compute_remainder(int x) {
   int y = init(); // -1
   return x % y;   // Undefined Behavior
 }
 
 int f(void) {
-  return remainder(INT_MIN);
+  return compute_remainder(INT_MIN);
 }
 ```
 
@@ -1278,7 +1278,6 @@ Note: This UB has been eliminated by [N3346](https://www.open-std.org/jtc1/sc22/
 ### 81\. A function definition that does not have the asserted property is called by a function declaration or a function pointer with a type that has the unsequenced or reproducible attribute (6.7.13.8).
 
 ``` c
-int next(int *ip) [[reproducible]] {
 void adjust(unsigned *restrict x, unsigned *restrict y) [[reproducible]] {
     *x -= 3;  // Undefined Behavior, not reproducible
     *y += 2;  // Undefined Behavior, not reproducible
@@ -1388,14 +1387,14 @@ Reviewers: svoboda, gustedt
 
 ### 89\. The #embed preprocessing directive that results after expansion does not match any of the name forms (6.10.4).
 
-EXTENDED COMPILABLE EXAMPLE: Consider a platform that allows prefix and suffix commands associated with the embeddingn of a file.
+EXTENDED COMPILABLE EXAMPLE: Consider a platform that allows prefix and suffix commands associated with the embedding of a file.
 
 ``` c
 // Embed a text file and manually append a null-terminator
 const char message[] = {
-#embed "message.txt" prefix(define pro 25) suffix(undef pro)
+#embed "message.txt" limit(defined)
 // Undefined Behavior
-, '\0'
+  '\0'
 };
 ```
 
@@ -1571,7 +1570,7 @@ Reviewers: svoboda
 ``` c
 #define sin int x;
 
-#include <stdio.h>
+#include <math.h>
 // Undefined Behavior, sin() already defined
 ```
 
@@ -1580,9 +1579,10 @@ Reviewers: svoboda
 ### 104\. The program attempts to declare a library function itself, rather than via a standard header, but the declaration does not have external linkage (7.1.2).
 
 ``` c
-#include <stddef.h>
+// Includes declaration: void *malloc(size_t size)
+#include <stdlib.h>
 
-static void *malloc(size_t nbytes); // Undefined Behavior
+static void *malloc(int nbytes); // Undefined Behavior: int vs size_t
 ```
 
 Cite: CERT C Rule DCL37-C 4th NCCE 3.4.7
@@ -2381,7 +2381,7 @@ Reviewers: svoboda, UBSG
 ### 142\. Using a null pointer constant in form of an integer expression as an argument to a ... function and then interpreting it as a void \* or char \* (7.16.2.2).
 
 ``` c
- #include <stdarg.h>
+#include <stdarg.h>
 #include <stdio.h>
 
 int print_string(va_list *ap) {
@@ -2407,7 +2407,7 @@ int print_names(int count, ...) {
 
 
 void func() {
-  print_names( 3, "Tom", "Dick", "Harry");
+  print_names( 4, "Tom", "Dick", "Harry", NULL);
 }
 ```
 
@@ -2775,19 +2775,22 @@ Reviewers: svoboda, j.myers
 
 ``` c
 #include <stdio.h>
-#include <limits.h>
 #include <stdarg.h>
+#include <assert.h>
+#include <limits.h>
 
 // Assume this function is called with >INT_MAX arguments
 void f(int unused, ...) {
   va_list args;
   va_start( args, unused);
 
-  static unsigned int size = (unsigned int) INT_MAX + 1U;
+  static_assert(sizeof(unsigned long long) > sizeof(unsigned int));
+
+  static unsigned long long size = (unsigned long long) INT_MAX + 1U;
 
   char format_string[size*2 + 1]; // will be "%c%c%c..."
   // This assumes that SIZE_MAX > 2*UINT_MAX
-  for (unsigned int i = 0; i < size; i += 2) {
+  for (unsigned long long i = 0; i < size; i += 2) {
     format_string[i] = '%';
     format_string[i+1] = 'c';
   }
@@ -2858,10 +2861,11 @@ Reviewers: svoboda, j.myers
 #include <stdarg.h>
 
 void f(int first, ...) {
-  int local = 0;
   va_list args;
-  va_start( args, local);          // Oops, not first fixed arg!
-  vprintf("Hello, %s\n", args);    // Undefined Behavior
+  va_start( args);
+  vprintf("Hello, %s\n", args);
+  printf("First arg is %d\n", first);
+  printf("Remaining arg is %p\n", (void*) args); // Undefined Behavior
 }
 ```
 
@@ -2905,7 +2909,8 @@ if (f == NULL) {
 }
 assert(ftell( f) == 0);
 int c = 'A';
-c = ungetc( c, f);   // Undefined Behavior
+c = ungetc( c, f);
+printf("The file is now at position %lld\n", ftell(f));   // Undefined Behavior
 ```
 
 Reviewers: svoboda
@@ -3296,12 +3301,13 @@ Reviewers: svoboda, j.myers
 ``` c
 #include <stddef.h>
 #include <string.h>
+#include <wchar.h>
 
 void func(void) {
-  wchar_t wide_str1[] = L"0123456789";
-  wchar_t wide_str2[] = L"0000000000";
+  char str1[] = "0123456789";
+  char str2[] = "0000000000";
 
-  strncpy(wide_str2, wide_str1, 10);  // Undefined Behavior
+  wcsncpy(str2, str1, 10 * sizeof(wchar_t)); // Undefined Behavior
 }
 ```
 
@@ -3314,8 +3320,9 @@ Reviewers: svoboda
 ``` c
 #include <string.h>
 
-char *c = 0;
-int length = strlen(c); // Undefined Behavior
+char str[] = "abc";
+char *p = &(str[4]);  // Valid as long as p is not dereferenced.
+strcmp(str, p); // Undefined Behavior
 ```
 
 Reviewers: svoboda, j.myers
@@ -3325,9 +3332,11 @@ Reviewers: svoboda, j.myers
 ``` c
 char src[] = "This is a test";
 const int string_size = strlen(src) + 1;
-char dest[string_size - 1];                     // Oops, too small!
+char dest[string_size];
 int length = strxfrm(dest, src, string_size);
-puts(dest);                                     // Undefined Behavior
+if (length >= string_size) {
+  fprintf(stderr,"Transform error on %s\n", dest); // Undefined Behavior
+}
 ```
 
 Reviewers: svoboda
@@ -3401,7 +3410,7 @@ Reviewers: svoboda
 ``` c
 double d = 3.0;
 _Decimal64 d64 = 2.0;
-double result = remainder(d64, d);   // Undefined Behavior
+double result = compute_remainder(d64, d);   // Undefined Behavior
 ```
 
 Reviewers: svoboda
@@ -3657,7 +3666,7 @@ Reviewers: svoboda
 #include <time.h>
 
 void func(struct tm *time_tm) {
-  time_tm.tm_sec = 61;  // Invalid value, 0 <= tm_sec <= 60
+  time_tm->tm_sec = 61;  // Invalid value, 0 <= tm_sec <= 60
   char *time = asctime(time_tm);  // Undefined Behavior
   // ...
 }
