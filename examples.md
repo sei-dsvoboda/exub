@@ -2385,7 +2385,9 @@ Reviewers: svoboda, UBSG
 #include <stdio.h>
 
 int print_string(va_list *ap) {
-  char* name = va_arg(*ap, char*);  // Undefined Behavior, if value is NULL
+  char* name = va_arg(*ap, char*);  // Undefined Behavior
+  // if next arg is (int) 0 and sizeof(int) != sizeof(char*)
+
   if (name != NULL) {
     printf("Name: %s\n", name);
   } else {
@@ -2407,7 +2409,7 @@ int print_names(int count, ...) {
 
 
 void func() {
-  print_names( 4, "Tom", "Dick", "Harry", NULL);
+  print_names( 4, "Tom", "Dick", "Harry");
 }
 ```
 
