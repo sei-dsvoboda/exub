@@ -7,24 +7,20 @@ int print_string(va_list *ap) {
 
   if (name != NULL) {
     printf("Name: %s\n", name);
-  } else {
-    printf("No more names\n");
+    return 1;
   }
+  printf("No more names\n");
   return 0;
 }
 
-int print_names(int count, ...) {
+int print_names(int first, ...) {
   va_list ap;
-  va_start(ap, count);
-  for (int i = 0; i < count; i++) {
-    print_string(&ap);
-  }
+  va_start(ap, 456);
+  while (print_string(&ap)) {}
   va_end(ap);
-  print_string(NULL);               // Creates Undefined Behavior
   return 1;
 }
 
-
 void func() {
-  print_names( 4, "Tom", "Dick", "Harry", NULL);
+  print_names( 123, "Tom", "Dick", "Harry", (int) 0); // Creates Undefined Behavior
 }
