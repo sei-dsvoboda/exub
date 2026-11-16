@@ -26,5 +26,5 @@ int print_names(int count, ...) {
 
 
 void func() {
-  print_names( 4, "Tom", "Dick", "Harry");
+  print_names( 4, "Tom", "Dick", "Harry", NULL);
 }
